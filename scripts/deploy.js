@@ -3,8 +3,9 @@ const path = require("path");
 const hre = require("hardhat");
 
 async function main() {
-  const stablecoin = process.env.DIVIDEND_STABLECOIN;
-  if (!stablecoin) throw new Error("DIVIDEND_STABLECOIN is required.");
+  const rawStablecoin = process.env.DIVIDEND_STABLECOIN;
+  if (!rawStablecoin) throw new Error("DIVIDEND_STABLECOIN is required.");
+  const stablecoin = hre.ethers.getAddress(rawStablecoin.trim().toLowerCase());
 
   const [deployer] = await hre.ethers.getSigners();
   console.log(`Deploying with: ${deployer.address}`);
