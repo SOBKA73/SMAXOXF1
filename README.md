@@ -100,3 +100,61 @@ Les smart contracts ne doivent être développés qu’après validation documen
 - `starlink_financial_model.py` : modèle Pandas/NumPy recalibré sur 12 mois.
 - `financial_model_output.csv` : nouvelle base de données mensuelle générée par le script.
 - `requirements.txt` : dépendances Python.
+
+## Étape 2 — Infrastructure Blockchain Arbitrum
+
+### Contrat
+
+Le contrat [`contracts/StarlinkRwaToken.sol`](contracts/StarlinkRwaToken.sol) implémente un ERC-20 permissionné avec OpenZeppelin `ERC20`, `Ownable` et `ReentrancyGuard`.
+
+| Paramètre | Valeur |
+|---|---:|
+| Nom | `SMAXO Starlink Chad` |
+| Symbole | `SMAXOF1` |
+| Décimales | `0` |
+| Offre fixe | `20 000` tokens |
+| Valeur économique de référence | `500 XAF / token` |
+| Capital fondateur physique | `10 000 000 XAF` |
+| Levée représentée par les tokens | `10 000 000 XAF` |
+| Capital global d’exploitation cible | `20 000 000 XAF` |
+
+Le contrat ne crée pas et ne transfère pas automatiquement les 10 000 000 XAF physiques du fondateur : cette composante reste un apport hors chaîne qui doit être documenté, vérifié et comptabilisé. Le smart contract représente la tranche tokenisée de 20 000 unités.
+
+### Whitelist KYC / restriction de transfert
+
+Le gérant, détenteur de l’ownership, utilise `setWhitelist(address, bool)` ou `setWhitelistBatch(address[], bool)` après validation KYC/AML. Un transfert est accepté uniquement si l’adresse émettrice et l’adresse réceptrice sont whitelistées. Cette vérification est placée dans `_update`, ce qui couvre les transferts ERC-20 et les opérations de mint/burn selon leur origine. Le déploiement whitelist automatiquement l’owner afin qu’il puisse distribuer les tokens aux investisseurs approuvés.
+
+La whitelist on-chain ne remplace pas un dossier KYC, un contrôle de sanctions, les obligations de tenue de registre ou une autorisation ARCEP. La révocation d’une adresse empêche ses transferts ultérieurs, mais ne supprime pas son solde ni ses droits économiques déjà accumulés ; la politique juridique correspondante doit être arrêtée avant déploiement.
+
+### Distribution des rendements
+
+Deux mécanismes sont disponibles :
+
+1. `distributeDividends()` accepte de l’ETH natif Arbitrum et crédite un cumul de dividende par token.
+2. `distributeStablecoin(uint256)` prélève un stablecoin préconfiguré auprès de l’owner après approbation ERC-20.
+
+Les investisseurs utilisent ensuite `claimNativeDividends()` ou `claimStableDividends()`. Le calcul est strictement proportionnel au solde détenu au moment de la distribution et conserve les droits lors des transferts grâce à une comptabilité par corrections magnifiées. Le modèle est volontairement **pull-based** : il ne boucle pas sur toutes les adresses whitelistées, ce qui évite une transaction impossible à exécuter lorsque le nombre d’investisseurs augmente. Les montants non réclamés restent dans le contrat jusqu’à la réclamation.
+
+Le stablecoin est injecté au constructeur et doit être l’adresse officielle du réseau ciblé. Aucun stablecoin n’est hardcodé dans le contrat afin d’éviter un mauvais réseau ou une adresse obsolète.
+
+### Compilation, tests et déploiement
+
+Les commandes suivantes sont disponibles :
+
+```bash
+npm install
+npm run compile
+npm test
+
+# Testnet Arbitrum Sepolia
+export ARBITRUM_SEPOLIA_RPC_URL="..."
+export DEPLOYER_PRIVATE_KEY="..."
+export DIVIDEND_STABLECOIN="0x..."
+npm run deploy:sepolia
+```
+
+Le script [`scripts/deploy.js`](scripts/deploy.js) refuse de démarrer sans adresse de stablecoin explicite. Pour Arbitrum One, utiliser `npm run deploy:mainnet` après vérification indépendante de l’adresse officielle du stablecoin, du réseau, des paramètres KYC et des audits.
+
+### Contrôles avant production
+
+Cette implémentation est une base technique et n’est pas un audit. Avant un déploiement réel, il faut notamment faire auditer le contrat, vérifier le stablecoin choisi, tester la récupération de fonds et les scénarios de perte de clé owner, définir une gouvernance multisignature, établir une procédure de pause/réponse aux incidents, formaliser les droits économiques des tokens et confirmer la conformité CEMAC/Tchad, ARCEP, AML/KYC et valeurs mobilières. Le contrat ne contient volontairement aucune fonction de confiscation ou de gel discrétionnaire des soldes.
