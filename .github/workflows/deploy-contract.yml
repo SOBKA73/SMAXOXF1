@@ -27,7 +27,9 @@ jobs:
 
       - name: Deploy contract
         env:
-          ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+          # Public Arbitrum Sepolia JSON-RPC endpoint; the secret previously
+          # configured returned an HTTP redirect rather than JSON-RPC.
+          ARBITRUM_SEPOLIA_RPC_URL: https://sepolia-rollup.arbitrum.io/rpc
           DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           DIVIDEND_STABLECOIN: ${{ secrets.DIVIDEND_STABLECOIN }}
         run: npm run deploy:sepolia
