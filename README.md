@@ -158,3 +158,26 @@ Le script [`scripts/deploy.js`](scripts/deploy.js) refuse de démarrer sans adre
 ### Contrôles avant production
 
 Cette implémentation est une base technique et n’est pas un audit. Avant un déploiement réel, il faut notamment faire auditer le contrat, vérifier le stablecoin choisi, tester la récupération de fonds et les scénarios de perte de clé owner, définir une gouvernance multisignature, établir une procédure de pause/réponse aux incidents, formaliser les droits économiques des tokens et confirmer la conformité CEMAC/Tchad, ARCEP, AML/KYC et valeurs mobilières. Le contrat ne contient volontairement aucune fonction de confiscation ou de gel discrétionnaire des soldes.
+
+## Étape 3 — Dashboard Web3 interactif
+
+Le dossier [`frontend`](frontend/) contient une Single Page Application en JavaScript natif, sans framework ni backend. Elle adopte une direction visuelle sombre, épurée et dégradée inspirée des dashboards SaaS modernes.
+
+### Ouvrir le prototype
+
+Depuis la racine du dépôt, ouvrir directement `frontend/index.html` dans un navigateur moderne, ou lancer un serveur statique :
+
+```bash
+npx serve frontend -l 4173
+```
+
+Puis visiter `http://localhost:4173`.
+
+### Interactions disponibles
+
+- **Connecter le portefeuille** : bascule vers le portefeuille simulé `0xSOBK...73`, affiche 100 tokens `SMAXOF1`, une valeur nominale de 50 000 XAF et le statut KYC vérifié.
+- **Réclamer mes dividendes** : déclenche une animation de chargement, confirme la réclamation simulée de 53 550 XAF et remet le compteur à zéro.
+- **Gestionnaire / KYC** : le formulaire ajoute visuellement une adresse ou un alias à la liste blanche simulée.
+- **Performance RWA** : affiche le capital global de 20 000 000 XAF, les 20 000 tokens, le bénéfice net de 10 710 000 XAF et le Yield net réel de 107,10 %.
+
+Cette interface est une démonstration locale : elle ne demande aucune signature, ne se connecte pas réellement à Arbitrum et ne transfère aucun actif. Le branchement à `StarlinkRwaToken.sol` devra être ajouté après configuration du réseau, de l’adresse du contrat, du stablecoin officiel et des procédures KYC/AML.

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#090b16" />
+    <meta name="description" content="SMAXO Starlink Chad — dashboard RWA Web3." />
+    <title>SMAXO Starlink Chad | RWA Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="aurora aurora-one"></div>
+    <div class="aurora aurora-two"></div>
+
+    <header class="site-header container">
+      <a class="brand" href="#top" aria-label="SMAXO accueil">
+        <span class="brand-mark">S</span>
+        <span>SMAXO<span class="brand-muted">/RWA</span></span>
+      </a>
+      <nav class="nav-links" aria-label="Navigation principale">
+        <a href="#performance">Performance</a>
+        <a href="#investor">Investisseur</a>
+        <a href="#admin">Gestionnaire</a>
+      </nav>
+      <button id="connectButton" class="button button-primary button-connect" type="button">
+        Connecter le portefeuille
+      </button>
+    </header>
+
+    <main id="top" class="container">
+      <section class="hero section-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="status-dot"></span> RWA • N'DJAMENA • ARBITRUM</div>
+          <h1>Le rendement réel,<br /><span class="gradient-text">en mouvement.</span></h1>
+          <p class="hero-text">Une infrastructure transparente pour participer à l'économie numérique du Tchad, kit après kit et hotspot après hotspot.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#performance">Explorer la performance <span>↗</span></a>
+            <a class="button button-ghost" href="#investor">Voir mon espace</a>
+          </div>
+          <div class="trust-row"><span>● Contrat permissionné</span><span>● KYC on-chain</span><span>● 20 000 parts</span></div>
+        </div>
+        <div class="hero-visual card glass-card" aria-label="Aperçu de performance">
+          <div class="visual-top"><span class="mini-label">YIELD NET RÉEL</span><span class="chip chip-green">+107.10%</span></div>
+          <div class="hero-yield">107<span>.10</span><small>%</small></div>
+          <div class="sparkline" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="visual-footer"><span>Performance annualisée</span><span class="muted">12 mois · XAF</span></div>
+        </div>
+      </section>
+
+      <section id="performance" class="section-block">
+        <div class="section-heading"><div><div class="eyebrow">01 / PERFORMANCE RWA TCHAD</div><h2>Une vision claire de l'actif.</h2></div><span class="section-index">BASE 12 MOIS</span></div>
+        <div class="metric-grid">
+          <article class="metric-card card"><span class="metric-label">Capital global</span><strong>20 000 000</strong><span class="metric-unit">XAF · fonds propres + levée</span></article>
+          <article class="metric-card card"><span class="metric-label">Offre tokenisée</span><strong>20 000</strong><span class="metric-unit">SMAXOF1 · 500 XAF / token</span></article>
+          <article class="metric-card card metric-highlight"><span class="metric-label">Bénéfice net</span><strong>10 710 000</strong><span class="metric-unit">XAF · après impôts simulés</span></article>
+          <article class="metric-card card"><span class="metric-label">Yield net</span><strong>107,10<span class="small-percent">%</span></strong><span class="metric-unit">sur le capital tokenisé</span></article>
+        </div>
+      </section>
+
+      <section id="investor" class="section-block">
+        <div class="section-heading"><div><div class="eyebrow">02 / ESPACE INVESTISSEUR</div><h2>Votre position, en un coup d'œil.</h2></div><span class="section-index">WALLET CONNECTÉ</span></div>
+        <div class="investor-grid">
+          <article class="card portfolio-card locked-panel" data-requires-wallet>
+            <div class="card-top"><div><span class="metric-label">Solde portefeuille</span><h3 id="walletAddress">Portefeuille non connecté</h3></div><span class="token-icon">S</span></div>
+            <div class="token-balance"><strong id="tokenBalance">—</strong><span>SMAXOF1</span></div>
+            <div class="balance-line"><span>Valeur nominale</span><strong id="nominalValue">— XAF</strong></div>
+            <div class="balance-line"><span>Statut KYC</span><strong class="verified" id="kycStatus">En attente</strong></div>
+          </article>
+          <article class="card claim-card locked-panel" data-requires-wallet>
+            <div class="card-top"><div><span class="metric-label">Dividendes disponibles</span><h3>Votre rendement distribué</h3></div><span class="claim-icon">✦</span></div>
+            <div class="dividend-amount"><strong id="dividendAmount">—</strong><span>XAF</span></div>
+            <p id="claimDescription">Connectez votre portefeuille pour consulter vos dividendes.</p>
+            <button id="claimButton" class="button button-primary button-full" type="button" disabled>Réclamer mes dividendes</button>
+            <div id="claimMessage" class="feedback" role="status" aria-live="polite"></div>
+          </article>
+        </div>
+        <div id="walletNotice" class="notice"><span>◎</span><span>Connectez votre portefeuille pour débloquer votre espace investisseur.</span></div>
+      </section>
+
+      <section id="admin" class="section-block admin-section">
+        <div class="section-heading"><div><div class="eyebrow">03 / ESPACE GESTIONNAIRE</div><h2>Le contrôle, sans friction.</h2></div><span class="section-index">KYC CONSOLE</span></div>
+        <div class="admin-grid">
+          <article class="card admin-copy"><span class="admin-badge">ADMIN · OWNER</span><h3>Ajouter à la liste blanche</h3><p>Simulez l'approbation d'un investisseur après vérification KYC/AML. Cette interface est un prototype connecté à la logique du contrat permissionné.</p><div class="admin-stats"><span><strong>20 000</strong><small>tokens émis</small></span><span><strong>5</strong><small>hotspots actifs</small></span></div></article>
+          <form id="whitelistForm" class="card whitelist-form">
+            <label for="walletInput">Adresse du portefeuille</label>
+            <div class="input-wrap"><span>0x</span><input id="walletInput" name="wallet" type="text" placeholder="Entrez une adresse ou un alias" autocomplete="off" required /></div>
+            <button class="button button-primary button-full" type="submit">Approuver l'adresse <span>→</span></button>
+            <div id="whitelistMessage" class="feedback" role="status" aria-live="polite"></div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer container"><span>© 2026 SMAXO Starlink Chad</span><span>Prototype d'interface · Données simulées</span><span>Arbitrum-ready <span class="footer-dot"></span></span></footer>
+    <script src="app.js"></script>
+  </body>
+</html>
