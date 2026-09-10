@@ -181,3 +181,12 @@ Puis visiter `http://localhost:4173`.
 - **Performance RWA** : affiche le capital global de 20 000 000 XAF, les 20 000 tokens, le bénéfice net de 10 710 000 XAF et le Yield net réel de 107,10 %.
 
 Cette interface est une démonstration locale : elle ne demande aucune signature, ne se connecte pas réellement à Arbitrum et ne transfère aucun actif. Le branchement à `StarlinkRwaToken.sol` devra être ajouté après configuration du réseau, de l’adresse du contrat, du stablecoin officiel et des procédures KYC/AML.
+
+## Publication permanente du frontend
+
+Le prototype est versionné dans `main` et accessible via le CDN public jsDelivr, qui sert directement les fichiers du dépôt :
+
+**https://cdn.jsdelivr.net/gh/SOBKA73/SMAXOXF1@main/frontend/index.html**
+
+Cette URL suit la version publiée sur `main` et permet d’ouvrir le dashboard sans serveur local. Le workflow [`deploy-pages.yml`](.github/workflows/deploy-pages.yml) est également présent pour une publication GitHub Pages officielle dès que Pages est activé dans **Settings → Pages → Source: GitHub Actions** du dépôt.
+
