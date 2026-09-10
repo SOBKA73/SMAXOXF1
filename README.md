@@ -190,3 +190,9 @@ Le prototype est versionné dans `main` et accessible via le CDN public jsDelivr
 
 Cette URL suit la version publiée sur `main` et permet d’ouvrir le dashboard sans serveur local. Le workflow [`deploy-pages.yml`](.github/workflows/deploy-pages.yml) est également présent pour une publication GitHub Pages officielle dès que Pages est activé dans **Settings → Pages → Source: GitHub Actions** du dépôt.
 
+
+## Mode démonstration Web3 haute fidélité
+
+Pour la présentation INSEEC, le frontend GitHub Pages utilise un mode de simulation contrôlée : aucune clé privée, aucune transaction réelle et aucun fonds ne sont nécessaires. L’interface reproduit les états MetaMask/Ethers.js avec le portefeuille de démonstration `0x7fc05911b8eE165dA41F60fB90a971af14b6F7C5`, le réseau Arbitrum Sepolia simulé, l’affichage des 100 tokens, le claim des `53 550 XAF` et la validation visuelle de la whitelist ARCEP Tchad.
+
+Ce mode est distinct du smart contract Solidity : il est destiné à une démonstration utilisateur fiable lorsque le wallet Testnet ne dispose pas d’ETH de gas. Les opérations sont locales au navigateur et ne produisent aucun effet on-chain.
