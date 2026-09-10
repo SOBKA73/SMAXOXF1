@@ -1,0 +1,41 @@
+name: Deploy SMAXO contract to Arbitrum Sepolia
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile and test
+        run: npm test
+
+      - name: Deploy contract
+        env:
+          ARBITRUM_SEPOLIA_RPC_URL: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          DIVIDEND_STABLECOIN: ${{ secrets.DIVIDEND_STABLECOIN }}
+        run: npm run deploy:sepolia
+
+      - name: Commit deployment metadata
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/deployment.json
+          git diff --cached --quiet || git commit -m "Record Arbitrum Sepolia contract deployment"
+          git push
