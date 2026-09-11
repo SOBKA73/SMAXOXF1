@@ -39,6 +39,7 @@ const availableLiquidity = $("#availableLiquidity");
 const capTableSummary = $("#capTableSummary");
 const marketChartCanvas = $("#marketChart");
 let marketChart;
+let fallbackTimer;
 const formatNumber = (value) => new Intl.NumberFormat("fr-FR").format(value);
 const formatPrice = (value) => new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
 const shortAddress = (address) => `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -53,10 +54,29 @@ async function loadMarketState() {
     const response = await fetch(`market_state.json?t=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) throw new Error("market_state.json indisponible");
     const state = await response.json();
+    if (fallbackTimer) {
+      clearInterval(fallbackTimer);
+      fallbackTimer = undefined;
+    }
     renderMarketState(state);
   } catch (error) {
-    renderMarketState(createFallbackMarketState());
+    const fallback = createFallbackMarketState();
+    renderMarketState(fallback);
     marketStatus.textContent = "Initialisation locale · synchronisation cloud en attente.";
+    if (!fallbackTimer) {
+      fallbackTimer = setInterval(() => {
+        const previous = fallback.current_price_xaf;
+        const change = Number((Math.random() * 1.2 - 0.5).toFixed(4));
+        fallback.current_price_xaf = Number((previous * (1 + change / 100)).toFixed(2));
+        fallback.previous_price_xaf = previous;
+        fallback.change_pct = change;
+        fallback.updated_at = new Date().toISOString();
+        fallback.history.push({ timestamp: fallback.updated_at, price_xaf: fallback.current_price_xaf, change_pct: change });
+        fallback.history = fallback.history.slice(-24);
+        renderMarketState(fallback);
+        marketStatus.textContent = "Initialisation locale · synchronisation cloud en attente.";
+      }, 10000);
+    }
   }
 }
 
