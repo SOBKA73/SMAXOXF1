@@ -38,8 +38,32 @@ const operationalTreasury = $("#operationalTreasury");
 const availableLiquidity = $("#availableLiquidity");
 const capTableSummary = $("#capTableSummary");
 const marketChartCanvas = $("#marketChart");
+const yieldChip = $("#yieldChip");
+const yieldValue = $("#yieldValue");
+const yieldMetric = $("#yieldMetric");
+const yieldMetricValue = $("#yieldMetricValue");
+const incidentButton = $("#incidentButton");
+const incidentMessage = $("#incidentMessage");
+const xafAmount = $("#xafAmount");
+const stablecoinAmount = $("#stablecoinAmount");
+const stablecoinSymbol = $("#stablecoinSymbol");
+const stablecoinToggle = $("#stablecoinToggle");
+const fxRate = $("#fxRate");
+const gasEstimate = $("#gasEstimate");
+const kitsDeployed = $("#kitsDeployed");
+const kitsProgress = $("#kitsProgress");
+const trackerStatus = $("#trackerStatus");
+const lastKitSite = $("#lastKitSite");
 let marketChart;
 let fallbackTimer;
+let incidentActive = false;
+let stablecoin = "USDC";
+let kitCount = 0;
+let simulatedLiquidity = 0;
+let kitTimer;
+let CEMAC_USD_XAF = 600;
+const XAF_PER_EUR = 655.957;
+const KIT_SITES = ["Moursal", "Farcha", "Walia", "N'Djari", "Chagoua", "Klemat"];
 const formatNumber = (value) => new Intl.NumberFormat("fr-FR").format(value);
 const formatPrice = (value) => new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
 const shortAddress = (address) => `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -58,9 +82,11 @@ async function loadMarketState() {
       clearInterval(fallbackTimer);
       fallbackTimer = undefined;
     }
+    state.market = state;
     renderMarketState(state);
   } catch (error) {
     const fallback = createFallbackMarketState();
+    state.market = fallback;
     renderMarketState(fallback);
     marketStatus.textContent = "Initialisation locale · synchronisation cloud en attente.";
     if (!fallbackTimer) {
@@ -93,6 +119,7 @@ function createFallbackMarketState() {
 }
 
 function renderMarketState(state) {
+    if (!incidentActive) window.latestMarketState = state;
     const transparency = state.transparency || {};
     const capTable = transparency.cap_table || {};
     const change = Number(state.change_pct || 0);
@@ -123,6 +150,113 @@ function renderMarketState(state) {
       },
     });
 }
+
+function renderYield(value, incident = false) {
+  const formatted = Number(value).toFixed(2);
+  if (yieldChip) {
+    yieldChip.textContent = `${value >= 0 ? "+" : ""}${formatted}%`;
+    yieldChip.classList.toggle("chip-green", !incident);
+    yieldChip.classList.toggle("chip-red", incident);
+  }
+  if (yieldValue) yieldValue.innerHTML = `${formatted.split(".")[0]}<span>.${formatted.split(".")[1]}</span><small>%</small>`;
+  if (yieldMetricValue) yieldMetricValue.innerHTML = `${formatted.replace(".", ",")}<span class="small-percent">%</span>`;
+  if (yieldMetric) yieldMetric.classList.toggle("metric-highlight", incident);
+}
+
+function simulateIncident() {
+  if (incidentActive || !state.market) return;
+  incidentActive = true;
+  const previous = Number(state.market.current_price_xaf || 500);
+  const incidentPrice = Number((previous * 0.7).toFixed(2));
+  state.market = {
+    ...state.market,
+    previous_price_xaf: previous,
+    current_price_xaf: incidentPrice,
+    change_pct: -30,
+    updated_at: new Date().toISOString(),
+    history: [...(state.market.history || []), { timestamp: new Date().toISOString(), price_xaf: incidentPrice, change_pct: -30 }].slice(-24),
+  };
+  document.body.classList.add("incident-mode");
+  renderMarketState(state.market);
+  renderYield(-30, true);
+  incidentMessage.textContent = "Incident simulé · réserve électrique de secours activée.";
+  incidentButton.disabled = true;
+  incidentButton.textContent = "Incident actif · réserve engagée";
+  const alert = document.createElement("div");
+  alert.className = "critical-alert";
+  alert.setAttribute("role", "alert");
+  alert.textContent = "⚠️ INCIDENT TECHNIQUE : Instabilité réseau détectée au Tchad - Basculement automatique sur la réserve électrique de secours (Fonds OPEX activés)";
+  document.body.appendChild(alert);
+}
+
+function updateConversion() {
+  const xaf = Math.max(0, Number(xafAmount?.value || 0));
+  const converted = xaf / CEMAC_USD_XAF;
+  if (stablecoinAmount) stablecoinAmount.textContent = converted.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (stablecoinSymbol) stablecoinSymbol.textContent = stablecoin;
+  if (fxRate) fxRate.textContent = `1 USD ≈ ${CEMAC_USD_XAF.toLocaleString("fr-FR")} XAF`;
+  if (gasEstimate) gasEstimate.textContent = `≈ ${(xaf > 0 ? 3.5 : 0).toFixed(2).replace(".", ",")} XAF`;
+}
+
+async function loadReferenceRate() {
+  try {
+    const response = await fetch("https://api.frankfurter.app/latest?from=USD&to=EUR", { cache: "no-store" });
+    if (!response.ok) throw new Error("Cours de référence indisponible");
+    const data = await response.json();
+    const usdToEur = Number(data.rates?.EUR);
+    if (!Number.isFinite(usdToEur) || usdToEur <= 0) throw new Error("Cours invalide");
+    CEMAC_USD_XAF = Number((usdToEur * XAF_PER_EUR).toFixed(2));
+    updateConversion();
+  } catch {
+    updateConversion();
+  }
+}
+
+function showToast(message) {
+  let stack = $("#toastStack");
+  if (!stack) {
+    stack = document.createElement("div");
+    stack.id = "toastStack";
+    stack.className = "toast-stack";
+    document.body.appendChild(stack);
+  }
+  const toast = document.createElement("div");
+  toast.className = "activity-toast";
+  toast.textContent = message;
+  stack.appendChild(toast);
+  window.setTimeout(() => toast.remove(), 5000);
+}
+
+function updateKitTracker() {
+  if (kitCount >= 15) return;
+  kitCount += 1;
+  simulatedLiquidity += 250000;
+  const site = KIT_SITES[Math.floor(Math.random() * KIT_SITES.length)];
+  kitsDeployed.textContent = kitCount;
+  kitsProgress.style.width = `${(kitCount / 15) * 100}%`;
+  lastKitSite.textContent = site;
+  trackerStatus.textContent = kitCount === 15 ? "Objectif terrain atteint · 15 kits actifs." : "Installation terrain validée · prochaine synchronisation en préparation.";
+  const baseLiquidity = Number(String(availableLiquidity.textContent).replace(/\s/g, "").replace(",", ".")) || 0;
+  availableLiquidity.textContent = formatNumber(baseLiquidity + 250000);
+  showToast(`🚀 Nouveau kit validé et installé à ${site} !`);
+}
+
+function scheduleKitInstallation() {
+  if (kitCount >= 15) return;
+  const delay = 18000 + Math.random() * 17000;
+  kitTimer = window.setTimeout(() => {
+    updateKitTracker();
+    scheduleKitInstallation();
+  }, delay);
+}
+
+incidentButton?.addEventListener("click", simulateIncident);
+xafAmount?.addEventListener("input", updateConversion);
+stablecoinToggle?.addEventListener("click", () => {
+  stablecoin = stablecoin === "USDC" ? "USDT" : "USDC";
+  stablecoinToggle.textContent = `Basculer vers ${stablecoin === "USDC" ? "USDT" : "USDC"}`;
+  updateConversion();
+});
 
 function resetInvestor() {
   walletAddress.textContent = "Portefeuille non connecté";
@@ -308,4 +442,7 @@ const loaderStyle = document.createElement("style");
 loaderStyle.textContent = ".loader{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}";
 document.head.appendChild(loaderStyle);
 resetInvestor();
+updateConversion();
+loadReferenceRate();
+scheduleKitInstallation();
 loadMarketState();

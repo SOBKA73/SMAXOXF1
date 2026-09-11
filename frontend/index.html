@@ -43,8 +43,8 @@
           <div class="trust-row"><span>● Contrat permissionné</span><span>● KYC on-chain</span><span>● 20 000 parts</span></div>
         </div>
         <div class="hero-visual card glass-card" aria-label="Aperçu de performance">
-          <div class="visual-top"><span class="mini-label">YIELD NET RÉEL</span><span class="chip chip-green">+107.10%</span></div>
-          <div class="hero-yield">107<span>.10</span><small>%</small></div>
+          <div class="visual-top"><span class="mini-label">YIELD NET RÉEL</span><span id="yieldChip" class="chip chip-green">+107.10%</span></div>
+          <div id="yieldValue" class="hero-yield">107<span>.10</span><small>%</small></div>
           <div class="sparkline" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           <div class="visual-footer"><span>Performance annualisée</span><span class="muted">12 mois · XAF</span></div>
         </div>
@@ -56,7 +56,7 @@
           <article class="metric-card card"><span class="metric-label">Capital global</span><strong>20 000 000</strong><span class="metric-unit">XAF · fonds propres + levée</span></article>
           <article class="metric-card card"><span class="metric-label">Offre tokenisée</span><strong>20 000</strong><span class="metric-unit">SMAXOF1 · 500 XAF / token</span></article>
           <article class="metric-card card metric-highlight"><span class="metric-label">Bénéfice net</span><strong>10 710 000</strong><span class="metric-unit">XAF · après impôts simulés</span></article>
-          <article class="metric-card card"><span class="metric-label">Yield net</span><strong>107,10<span class="small-percent">%</span></strong><span class="metric-unit">sur le capital tokenisé</span></article>
+          <article id="yieldMetric" class="metric-card card"><span class="metric-label">Yield net</span><strong id="yieldMetricValue">107,10<span class="small-percent">%</span></strong><span class="metric-unit">sur le capital tokenisé</span></article>
         </div>
       </section>
 
@@ -70,6 +70,28 @@
             <article class="metric-card card metric-highlight"><span class="metric-label">Liquidité disponible</span><strong id="availableLiquidity">—</strong><span class="metric-unit">XAF · bénéfices simulés</span></article>
             <article class="metric-card card"><span class="metric-label">Cap table</span><strong id="capTableSummary">50 / 50</strong><span class="metric-unit">Fondateur / investisseurs</span></article>
           </div>
+        </div>
+      </section>
+
+      <section id="operations" class="section-block">
+        <div class="section-heading"><div><div class="eyebrow">OPÉRATIONS · WEB3 · TERRAIN</div><h2>Les flux qui font vivre l'actif.</h2></div><span class="section-index">TEMPS RÉEL</span></div>
+        <div class="operations-grid">
+          <article class="card converter-card">
+            <div class="card-top"><div><span class="metric-label">Convertisseur stablecoin</span><h3>XAF ⇄ USDC / USDT</h3></div><span class="token-icon">$</span></div>
+            <label class="field-label" for="xafAmount">Montant en Francs CFA</label>
+            <div class="input-wrap converter-input"><input id="xafAmount" type="number" min="0" step="100" value="50000" inputmode="decimal" /><span>XAF</span></div>
+            <div class="conversion-result"><strong id="stablecoinAmount">83,33</strong><span id="stablecoinSymbol">USDC</span></div>
+            <div class="conversion-meta"><span>Taux indicatif CEMAC</span><strong id="fxRate">1 USD ≈ 600 XAF</strong></div>
+            <div class="conversion-meta"><span>Micro-frais réseau estimés</span><strong id="gasEstimate">≈ 3,50 XAF</strong></div>
+            <div class="conversion-switch"><button id="stablecoinToggle" class="button button-ghost" type="button">Basculer vers USDT</button><span>Arbitrum · estimation indicative</span></div>
+          </article>
+          <article class="card tracker-card">
+            <div class="card-top"><div><span class="metric-label">Tracker d'activité réelle</span><h3>Kits Starlink déployés</h3></div><span class="live-dot">LIVE</span></div>
+            <div class="tracker-count"><strong id="kitsDeployed">0</strong><span>/ 15</span></div>
+            <div class="progress-track" aria-label="Progression des kits déployés"><div id="kitsProgress" class="progress-fill"></div></div>
+            <p id="trackerStatus" class="tracker-status">Synchronisation des installations terrain...</p>
+            <div class="tracker-footer"><span>Dernier site</span><strong id="lastKitSite">En attente</strong></div>
+          </article>
         </div>
       </section>
 
@@ -96,7 +118,7 @@
       <section id="admin" class="section-block admin-section">
         <div class="section-heading"><div><div class="eyebrow">03 / ESPACE GESTIONNAIRE</div><h2>Le contrôle, sans friction.</h2></div><span class="section-index">KYC CONSOLE</span></div>
         <div class="admin-grid">
-          <article class="card admin-copy"><span class="admin-badge">ADMIN · OWNER</span><h3>Ajouter à la liste blanche</h3><p>Approuvez une adresse après vérification KYC/AML. Les actions administratives sont signées par le portefeuille Owner sur Arbitrum Sepolia.</p><div class="admin-stats"><span><strong>20 000</strong><small>tokens émis</small></span><span><strong>5</strong><small>hotspots actifs</small></span></div><button id="pauseButton" class="button button-ghost button-full" type="button">Urgence : Geler le contrat</button><div id="pauseMessage" class="feedback" role="status" aria-live="polite"></div></article>
+          <article class="card admin-copy"><span class="admin-badge">ADMIN · OWNER</span><h3>Ajouter à la liste blanche</h3><p>Approuvez une adresse après vérification KYC/AML. Les actions administratives sont signées par le portefeuille Owner sur Arbitrum Sepolia.</p><div class="admin-stats"><span><strong>20 000</strong><small>tokens émis</small></span><span><strong>5</strong><small>hotspots actifs</small></span></div><button id="incidentButton" class="button button-danger button-full" type="button">Simuler un incident à N'Djamena</button><div id="incidentMessage" class="feedback" role="status" aria-live="polite"></div><button id="pauseButton" class="button button-ghost button-full" type="button">Urgence : Geler le contrat</button><div id="pauseMessage" class="feedback" role="status" aria-live="polite"></div></article>
             <form id="whitelistForm" class="card whitelist-form">
             <label for="walletInput">Adresse du portefeuille</label>
             <div class="input-wrap"><span>0x</span><input id="walletInput" name="wallet" type="text" placeholder="Entrez une adresse ou un alias" autocomplete="off" required /></div>

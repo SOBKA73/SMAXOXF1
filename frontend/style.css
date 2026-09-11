@@ -75,3 +75,36 @@ h1 { font-size: clamp(48px, 6.2vw, 82px); line-height: 1.02; margin: 22px 0; }
 .transparency-grid { grid-template-columns: repeat(2, 1fr); }
 #marketChange.chip-red { color: #ff9aaf; background: rgba(255, 110, 143, .12); }
 @media (max-width: 800px) { .market-grid { grid-template-columns: 1fr; } }
+
+/* Operations modules */
+.operations-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 14px; }
+.converter-card, .tracker-card { padding: 26px; min-height: 335px; }
+.converter-card h3, .tracker-card h3 { margin-top: 8px; font-family: "Space Grotesk"; font-size: 20px; }
+.field-label { display: block; margin: 27px 0 8px; color: #dcdceb; font-size: 12px; }
+.converter-input { margin-bottom: 16px; }
+.converter-input input { font-family: "Space Grotesk"; font-size: 22px; }
+.conversion-result { display: flex; align-items: baseline; gap: 10px; padding: 15px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.conversion-result strong { font-family: "Space Grotesk"; font-size: 37px; letter-spacing: -.06em; }
+.conversion-result span { color: var(--green); font-weight: 700; }
+.conversion-meta, .tracker-footer { display: flex; justify-content: space-between; gap: 12px; padding-top: 13px; color: var(--muted); font-size: 11px; }
+.conversion-meta strong, .tracker-footer strong { color: var(--text); font-size: 11px; }
+.conversion-switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 17px; color: var(--muted); font-size: 10px; }
+.conversion-switch .button { padding: 9px 11px; font-size: 10px; white-space: nowrap; }
+.tracker-count { display: flex; align-items: baseline; gap: 8px; margin: 40px 0 16px; }
+.tracker-count strong { font-family: "Space Grotesk"; font-size: 64px; letter-spacing: -.08em; }
+.tracker-count span { color: var(--muted); font-size: 18px; }
+.progress-track { height: 10px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.08); }
+.progress-fill { width: 0%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--purple), var(--green)); transition: width .6s ease; }
+.tracker-status { min-height: 36px; margin: 17px 0 0; color: var(--muted); font-size: 12px; }
+.live-dot { color: var(--green); font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+.live-dot::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(124,240,191,.1); }
+.button-danger { color: #ffb6c5; border-color: rgba(255,110,143,.42); background: rgba(255,110,143,.09); }
+.button-danger:hover { background: rgba(255,110,143,.18); }
+.critical-alert { position: fixed; z-index: 20; top: 82px; left: 50%; width: min(720px, calc(100% - 32px)); transform: translateX(-50%); padding: 15px 18px; border: 1px solid rgba(255,110,143,.65); border-radius: 12px; color: #ffd9e2; background: rgba(79,18,39,.95); box-shadow: 0 18px 50px rgba(0,0,0,.35); font-size: 12px; font-weight: 700; text-align: center; animation: critical-pulse 1s steps(2,end) infinite; }
+@keyframes critical-pulse { 50% { opacity: .48; } }
+.incident-mode #yieldChip, .incident-mode #yieldMetricValue, .incident-mode #yieldValue { color: #ff9aaf !important; }
+.incident-mode #yieldMetric { border-color: rgba(255,110,143,.48); box-shadow: 0 0 25px rgba(255,110,143,.1); }
+.toast-stack { position: fixed; z-index: 19; right: 22px; bottom: 22px; display: grid; gap: 10px; width: min(350px, calc(100% - 32px)); }
+.activity-toast { padding: 14px 16px; border: 1px solid rgba(124,240,191,.35); border-radius: 11px; color: #e6fff5; background: rgba(13,36,35,.96); box-shadow: 0 16px 35px rgba(0,0,0,.28); font-size: 12px; animation: toast-in .3s ease both; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 800px) { .operations-grid { grid-template-columns: 1fr; } .conversion-switch { align-items: flex-start; flex-direction: column; } .critical-alert { top: 76px; } }
