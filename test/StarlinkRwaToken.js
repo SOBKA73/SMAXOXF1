@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
- describe("StarlinkRwaToken", function () {
+describe("StarlinkRwaToken", function () {
   async function fixture() {
     const [owner, investorA, investorB, outsider] = await ethers.getSigners();
     const Stable = await ethers.getContractFactory("MockStablecoin");
@@ -20,49 +20,62 @@ const { ethers } = require("hardhat");
 
   it("blocks non-whitelisted recipients and permits approved transfers", async function () {
     const { owner, investorA, outsider, token } = await fixture();
-    await expect(token.transfer(outsider.address, 1)).to.be.revertedWithCustomError(
-      token,
-      "NotWhitelisted"
-    );
+    await expect(token.transfer(outsider.address, 1)).to.be.revertedWithCustomError(token, "NotWhitelisted");
     await token.setWhitelist(investorA.address, true);
     await token.transfer(investorA.address, 5_000);
     expect(await token.balanceOf(investorA.address)).to.equal(5_000);
   });
 
   it("allocates native dividends pro rata and supports pull claims", async function () {
-    const { owner, investorA, investorB, token } = await fixture();
+    const { investorA, investorB, token } = await fixture();
     await token.setWhitelist(investorA.address, true);
     await token.setWhitelist(investorB.address, true);
     await token.transfer(investorA.address, 5_000);
     await token.transfer(investorB.address, 5_000);
-
     await token.distributeDividends({ value: ethers.parseEther("1") });
-    expect(await token.nativeDividendsOwed(investorA.address)).to.equal(
-      ethers.parseEther("0.25")
-    );
-    expect(await token.nativeDividendsOwed(investorB.address)).to.equal(
-      ethers.parseEther("0.25")
-    );
+    expect(await token.nativeDividendsOwed(investorA.address)).to.equal(ethers.parseEther("0.25"));
+    expect(await token.nativeDividendsOwed(investorB.address)).to.equal(ethers.parseEther("0.25"));
     await expect(token.connect(investorA).claimNativeDividends())
       .to.emit(token, "NativeDividendsClaimed")
       .withArgs(investorA.address, ethers.parseEther("0.25"));
   });
 
-  it("allocates stablecoin dividends pro rata", async function () {
-    const { owner, investorA, investorB, stable, token } = await fixture();
+  it("allocates stablecoin dividends with SafeERC20", async function () {
+    const { investorA, investorB, stable, token } = await fixture();
     await token.setWhitelist(investorA.address, true);
     await token.setWhitelist(investorB.address, true);
     await token.transfer(investorA.address, 5_000);
     await token.transfer(investorB.address, 5_000);
-
     const amount = ethers.parseUnits("1000", 18);
     await stable.approve(await token.getAddress(), amount);
     await token.distributeStablecoin(amount);
-    expect(await token.stableDividendsOwed(investorA.address)).to.equal(
-      ethers.parseUnits("250", 18)
-    );
-    expect(await token.stableDividendsOwed(investorB.address)).to.equal(
-      ethers.parseUnits("250", 18)
-    );
+    expect(await token.stableDividendsOwed(investorA.address)).to.equal(ethers.parseUnits("250", 18));
+    expect(await token.stableDividendsOwed(investorB.address)).to.equal(ethers.parseUnits("250", 18));
+  });
+
+  it("restricts pause controls to the owner and blocks normal transfers while paused", async function () {
+    const { owner, investorA, token } = await fixture();
+    await token.setWhitelist(investorA.address, true);
+    await token.pause();
+    expect(await token.paused()).to.equal(true);
+    await expect(token.connect(investorA).transfer(owner.address, 1)).to.be.revertedWithCustomError(token, "EnforcedPause");
+    await expect(token.connect(investorA).pause()).to.be.revertedWithCustomError(token, "OwnableUnauthorizedAccount");
+    await token.unpause();
+    expect(await token.paused()).to.equal(false);
+  });
+
+  it("recovers a lost wallet balance only while paused and for whitelisted addresses", async function () {
+    const { owner, investorA, investorB, token } = await fixture();
+    await token.setWhitelist(investorA.address, true);
+    await token.setWhitelist(investorB.address, true);
+    await token.transfer(investorA.address, 1_000);
+    await token.pause();
+    await expect(token.emergencyRecoverTokens(investorA.address, investorB.address))
+      .to.emit(token, "EmergencyTokensRecovered")
+      .withArgs(investorA.address, investorB.address, 1_000);
+    expect(await token.balanceOf(investorA.address)).to.equal(0);
+    expect(await token.balanceOf(investorB.address)).to.equal(1_000);
+    await token.unpause();
+    await expect(token.emergencyRecoverTokens(investorA.address, investorB.address)).to.be.revertedWithCustomError(token, "ExpectedPause");
   });
 });

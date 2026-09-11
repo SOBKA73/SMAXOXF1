@@ -83,13 +83,20 @@
       <section id="admin" class="section-block admin-section">
         <div class="section-heading"><div><div class="eyebrow">03 / ESPACE GESTIONNAIRE</div><h2>Le contrôle, sans friction.</h2></div><span class="section-index">KYC CONSOLE</span></div>
         <div class="admin-grid">
-          <article class="card admin-copy"><span class="admin-badge">ADMIN · OWNER</span><h3>Ajouter à la liste blanche</h3><p>Simulez l'approbation d'un investisseur après vérification KYC/AML. Cette interface est un prototype connecté à la logique du contrat permissionné.</p><div class="admin-stats"><span><strong>20 000</strong><small>tokens émis</small></span><span><strong>5</strong><small>hotspots actifs</small></span></div></article>
-          <form id="whitelistForm" class="card whitelist-form">
+          <article class="card admin-copy"><span class="admin-badge">ADMIN · OWNER</span><h3>Ajouter à la liste blanche</h3><p>Approuvez une adresse après vérification KYC/AML. Les actions administratives sont signées par le portefeuille Owner sur Arbitrum Sepolia.</p><div class="admin-stats"><span><strong>20 000</strong><small>tokens émis</small></span><span><strong>5</strong><small>hotspots actifs</small></span></div><button id="pauseButton" class="button button-ghost button-full" type="button">Urgence : Geler le contrat</button><div id="pauseMessage" class="feedback" role="status" aria-live="polite"></div></article>
+            <form id="whitelistForm" class="card whitelist-form">
             <label for="walletInput">Adresse du portefeuille</label>
             <div class="input-wrap"><span>0x</span><input id="walletInput" name="wallet" type="text" placeholder="Entrez une adresse ou un alias" autocomplete="off" required /></div>
             <button class="button button-primary button-full" type="submit">Approuver l'adresse <span>→</span></button>
-            <div id="whitelistMessage" class="feedback" role="status" aria-live="polite"></div>
-          </form>
+              <div id="whitelistMessage" class="feedback" role="status" aria-live="polite"></div>
+            </form>
+            <form id="recoveryForm" class="card whitelist-form">
+              <label for="lostWalletInput">Récupération d’un portefeuille perdu</label>
+              <div class="input-wrap"><span>Perdu</span><input id="lostWalletInput" name="lostWallet" type="text" placeholder="Adresse perdue" autocomplete="off" required /></div>
+              <div class="input-wrap"><span>Nouveau</span><input id="newWalletInput" name="newWallet" type="text" placeholder="Nouvelle adresse whitelistée" autocomplete="off" required /></div>
+              <button class="button button-primary button-full" type="submit">Transférer le solde de secours <span>→</span></button>
+              <div id="recoveryMessage" class="feedback" role="status" aria-live="polite"></div>
+            </form>
         </div>
       </section>
     </main>

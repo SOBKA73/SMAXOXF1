@@ -89,3 +89,19 @@ Avant toute utilisation avec des fonds ayant une valeur réelle, il est recomman
 ## 8. Conclusion
 
 Sur la base de la revue manuelle, des tests Hardhat et du scan Slither exécuté, le contrat présente un **risque technique global faible dans son périmètre actuel**, sans finding High ou Medium identifié. Les fonctions de claim sont protégées contre la réentrance par `ReentrancyGuard`, les fonctions sensibles sont restreintes par `Ownable`, et les transferts sont conditionnés par la whitelist. Les observations Low/Informational listées ci-dessus doivent néanmoins être traitées ou acceptées explicitement avant une utilisation en production.
+
+## 9. Remédiations post-audit — version renforcée du code
+
+Une version renforcée de `StarlinkRwaToken.sol` a été préparée après la revue Slither. Le pragma du contrat principal est maintenant figé sur `0.8.20`, `SafeERC20` est utilisé pour les transferts du stablecoin, et `distributeStablecoin()` est protégé par `nonReentrant`. Les observations Low liées à `transferFrom` et aux appels externes du stablecoin sont ainsi remédiées au niveau du contrat principal.
+
+Le module opérationnel ajoute également `Pausable`, avec `pause()` et `unpause()` réservées à l’Owner. La fonction `emergencyRecoverTokens(lostAddress, newAddress)` est utilisable uniquement lorsque le contrat est en pause, exige que les deux adresses soient whitelistées et transfère le solde de l’adresse perdue en conservant le chemin comptable interne des dividendes. Cette fonction doit être utilisée uniquement après une validation KYC/AML et une preuve hors chaîne de perte de clé.
+
+La suite Hardhat renforcée compte désormais **6 tests réussis** : supply et décimales, whitelist et transferts, dividendes natifs, dividendes stablecoin avec SafeERC20, pause/contrôle Owner et récupération d’un portefeuille perdu.
+
+Le nouveau scan Slither ne remonte plus les observations Low de réentrance sur `distributeStablecoin`. Il conserve uniquement des observations Informational : l’appel bas niveau nécessaire au paiement ETH dans `claimNativeDividends()` et les contraintes pragma des dépendances OpenZeppelin/interfaces. Ces éléments sont documentés, contrôlés et acceptés dans le périmètre actuel ; ils ne constituent pas des findings High, Medium ou Low sur le contrat principal.
+
+## 10. Statut de déploiement de la version renforcée
+
+La version renforcée modifie le bytecode et nécessite un **nouveau déploiement** pour activer `pause`, `unpause` et `emergencyRecoverTokens` sur la blockchain. L’adresse actuellement déployée `0xe52f7A50D7d000D011dE760CBdeB57363A029406` correspond à la version précédente du bytecode et ne doit pas être présentée comme intégrant ces nouvelles fonctions tant qu’un redeploiement et une migration documentée n’ont pas été réalisés.
+
+Le code renforcé, les tests, le frontend et cette documentation sont publiés dans le dépôt. Avant redeploiement, il faut décider de la stratégie de migration des 20 000 tokens et des droits économiques existants : un nouveau constructeur remint la supply initiale et ne migre pas automatiquement les soldes de l’ancien contrat. Cette décision doit être validée par le Owner et documentée avant toute action on-chain.

@@ -23,6 +23,12 @@ const claimMessage = $("#claimMessage");
 const whitelistForm = $("#whitelistForm");
 const walletInput = $("#walletInput");
 const whitelistMessage = $("#whitelistMessage");
+const pauseButton = $("#pauseButton");
+const pauseMessage = $("#pauseMessage");
+const recoveryForm = $("#recoveryForm");
+const lostWalletInput = $("#lostWalletInput");
+const newWalletInput = $("#newWalletInput");
+const recoveryMessage = $("#recoveryMessage");
 const formatNumber = (value) => new Intl.NumberFormat("fr-FR").format(value);
 const shortAddress = (address) => `${address.slice(0, 6)}...${address.slice(-4)}`;
 
@@ -151,6 +157,58 @@ whitelistForm.addEventListener("submit", async (event) => {
   } finally {
     submit.disabled = false;
     submit.innerHTML = "Approuver l'adresse <span>→</span>";
+  }
+});
+
+pauseButton.addEventListener("click", async () => {
+  if (!state.contract) return feedback(pauseMessage, "Connectez d’abord le portefeuille Owner.", true);
+  if (!state.contract.pause) return feedback(pauseMessage, "Cette fonction sera disponible après le redeploiement du contrat renforcé.", true);
+  pauseButton.disabled = true;
+  pauseButton.innerHTML = '<span class="loader"></span> Signature Owner...';
+  try {
+    const owner = await state.contract.owner();
+    if (owner.toLowerCase() !== state.account.toLowerCase()) throw new Error(`Owner requis : ${shortAddress(owner)}`);
+    const tx = await state.contract.pause();
+    await tx.wait();
+    feedback(pauseMessage, `Contrat gelé on-chain. Transaction : ${shortAddress(tx.hash)}.`);
+    pauseButton.textContent = "Contrat gelé ✓";
+  } catch (error) {
+    feedback(pauseMessage, error.shortMessage || error.reason || error.message || "Le gel a échoué.", true);
+    pauseButton.disabled = false;
+    pauseButton.textContent = "Urgence : Geler le contrat";
+  }
+});
+
+recoveryForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!state.contract) return feedback(recoveryMessage, "Connectez d’abord le portefeuille Owner.", true);
+  if (!state.contract.emergencyRecoverTokens) return feedback(recoveryMessage, "Cette fonction sera disponible après le redeploiement du contrat renforcé.", true);
+  let lostAddress;
+  let newAddress;
+  try {
+    lostAddress = ethers.getAddress(lostWalletInput.value.trim().toLowerCase());
+    newAddress = ethers.getAddress(newWalletInput.value.trim().toLowerCase());
+  } catch {
+    return feedback(recoveryMessage, "Les deux adresses doivent être valides.", true);
+  }
+  const submit = recoveryForm.querySelector("button");
+  submit.disabled = true;
+  submit.innerHTML = '<span class="loader"></span> Récupération on-chain...';
+  try {
+    const owner = await state.contract.owner();
+    if (owner.toLowerCase() !== state.account.toLowerCase()) throw new Error(`Owner requis : ${shortAddress(owner)}`);
+    const paused = await state.contract.paused();
+    if (!paused) throw new Error("Le contrat doit être gelé avant une récupération d’urgence.");
+    const tx = await state.contract.emergencyRecoverTokens(lostAddress, newAddress);
+    await tx.wait();
+    feedback(recoveryMessage, `Solde transféré vers ${shortAddress(newAddress)}. Transaction : ${shortAddress(tx.hash)}.`);
+    lostWalletInput.value = "";
+    newWalletInput.value = "";
+  } catch (error) {
+    feedback(recoveryMessage, error.shortMessage || error.reason || error.message || "La récupération a échoué.", true);
+  } finally {
+    submit.disabled = false;
+    submit.innerHTML = "Transférer le solde de secours <span>→</span>";
   }
 });
 

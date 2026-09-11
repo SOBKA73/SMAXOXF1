@@ -126,3 +126,11 @@ npm run deploy:sepolia
 ```
 
 Les secrets de déploiement ne doivent jamais être commités : `DEPLOYER_PRIVATE_KEY`, `ARBITRUM_SEPOLIA_RPC_URL` et `DIVIDEND_STABLECOIN` sont utilisés uniquement par GitHub Actions ou un environnement local sécurisé.
+
+## Hardening post-audit et module de secours
+
+Une version renforcée du contrat est maintenant présente dans `contracts/StarlinkRwaToken.sol`. Elle fige le pragma du contrat principal sur Solidity `0.8.20`, utilise `SafeERC20`, protège `distributeStablecoin()` par `nonReentrant` et ajoute `Pausable` ainsi que `emergencyRecoverTokens(lostAddress, newAddress)`. La récupération est volontairement limitée au mode pause, à l’Owner et à deux adresses whitelistées.
+
+La suite de tests renforcée comporte six tests passants. Le frontend contient les contrôles Owner **Urgence : Geler le contrat** et **Récupération d’un portefeuille perdu**. Tant que le nouveau bytecode n’est pas déployé, ces contrôles affichent que la fonction sera disponible après redeploiement ; ils ne simulent pas une action on-chain.
+
+> **Migration requise.** Le contrat actuellement publié à l’adresse [`0xe52f7A50D7d000D011dE760CBdeB57363A029406`](https://sepolia.arbiscan.io/address/0xe52f7A50D7d000D011dE760CBdeB57363A029406) est la version précédente et ne possède pas encore les fonctions de pause/récupération. Le nouveau contrat remint sa supply initiale lors du déploiement et ne migre pas automatiquement les soldes ni les droits économiques de l’ancien contrat. Le redeploiement et la migration doivent donc être approuvés et documentés séparément avant toute transaction on-chain.

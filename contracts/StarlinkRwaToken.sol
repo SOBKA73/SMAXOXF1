@@ -1,30 +1,25 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title SMAXO Starlink Chad
  * @notice Permissioned ERC-20 representing 20,000 whole RWA participation units.
- *
- * The token has zero decimals: one token equals one 500-XAF participation unit.
- * Transfers require both the sender and receiver to be KYC-whitelisted, except
- * for the constructor mint and any future burn.
- *
- * Dividends use a cumulative-per-token accounting model. This deliberately uses
- * pull claims rather than looping over all holders, so distribution remains safe
- * and viable as the whitelist grows on Arbitrum.
  */
-contract StarlinkRwaToken is ERC20, Ownable, ReentrancyGuard {
+contract StarlinkRwaToken is ERC20, Ownable, Pausable, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
     uint256 public constant TOTAL_TOKENS = 20_000;
     uint256 public constant TOKEN_NOMINAL_VALUE_XAF = 500;
     uint256 private constant MAGNITUDE = 1e24;
 
     IERC20 public immutable dividendStablecoin;
-
     mapping(address => bool) public isWhitelisted;
 
     uint256 public magnifiedNativeDividendPerShare;
@@ -33,19 +28,20 @@ contract StarlinkRwaToken is ERC20, Ownable, ReentrancyGuard {
     mapping(address => int256) private stableDividendCorrections;
     mapping(address => uint256) public nativeDividendsClaimed;
     mapping(address => uint256) public stableDividendsClaimed;
+    bool private emergencyRecoveryInProgress;
 
     event WhitelistUpdated(address indexed account, bool approved);
     event NativeDividendsDistributed(address indexed payer, uint256 amount);
     event StableDividendsDistributed(address indexed payer, uint256 amount);
     event NativeDividendsClaimed(address indexed account, uint256 amount);
     event StableDividendsClaimed(address indexed account, uint256 amount);
+    event EmergencyTokensRecovered(address indexed lostAddress, address indexed newAddress, uint256 amount);
 
     error NotWhitelisted(address account);
     error ZeroAddress();
     error ZeroAmount();
     error InvalidStablecoin();
     error TransferFailed();
-    error AmountExceedsAvailable();
 
     constructor(address stablecoin_) ERC20("SMAXO Starlink Chad", "SMAXOF1") Ownable(msg.sender) {
         if (stablecoin_ == address(0)) revert InvalidStablecoin();
@@ -55,19 +51,16 @@ contract StarlinkRwaToken is ERC20, Ownable, ReentrancyGuard {
         _mint(msg.sender, TOTAL_TOKENS);
     }
 
-    /// @notice One on-chain unit equals one whole 500-XAF participation unit.
     function decimals() public pure override returns (uint8) {
         return 0;
     }
 
-    /** @notice Approves or revokes one investor after the off-chain KYC check. */
     function setWhitelist(address account, bool approved) external onlyOwner {
         if (account == address(0)) revert ZeroAddress();
         isWhitelisted[account] = approved;
         emit WhitelistUpdated(account, approved);
     }
 
-    /** @notice Batch whitelist management for operational onboarding. */
     function setWhitelistBatch(address[] calldata accounts, bool approved) external onlyOwner {
         for (uint256 i; i < accounts.length; ++i) {
             if (accounts[i] == address(0)) revert ZeroAddress();
@@ -76,25 +69,45 @@ contract StarlinkRwaToken is ERC20, Ownable, ReentrancyGuard {
         }
     }
 
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
     /**
-     * @notice Deposits native ETH and allocates it pro rata per token.
-     * Native ETH is used as the Arbitrum settlement asset in this implementation.
+     * @notice Recover tokens from a validated lost wallet while the protocol is paused.
+     * Both addresses must remain KYC-whitelisted; the operation preserves dividend
+     * accounting by using the same internal update path as a normal transfer.
      */
+    function emergencyRecoverTokens(address lostAddress, address newAddress)
+        external
+        onlyOwner
+        whenPaused
+    {
+        if (lostAddress == address(0) || newAddress == address(0)) revert ZeroAddress();
+        if (!isWhitelisted[lostAddress]) revert NotWhitelisted(lostAddress);
+        if (!isWhitelisted[newAddress]) revert NotWhitelisted(newAddress);
+        uint256 amount = balanceOf(lostAddress);
+        if (amount == 0) revert ZeroAmount();
+
+        emergencyRecoveryInProgress = true;
+        _update(lostAddress, newAddress, amount);
+        emergencyRecoveryInProgress = false;
+        emit EmergencyTokensRecovered(lostAddress, newAddress, amount);
+    }
+
     function distributeDividends() external payable onlyOwner {
         if (msg.value == 0) revert ZeroAmount();
         magnifiedNativeDividendPerShare += (msg.value * MAGNITUDE) / totalSupply();
         emit NativeDividendsDistributed(msg.sender, msg.value);
     }
 
-    /**
-     * @notice Pulls stablecoins from the owner and allocates them pro rata.
-     * The owner must approve this contract for `amount` first. `amount` uses
-     * the stablecoin's native smallest-unit precision.
-     */
-    function distributeStablecoin(uint256 amount) external onlyOwner {
+    function distributeStablecoin(uint256 amount) external onlyOwner nonReentrant {
         if (amount == 0) revert ZeroAmount();
-        bool ok = dividendStablecoin.transferFrom(msg.sender, address(this), amount);
-        if (!ok) revert TransferFailed();
+        dividendStablecoin.safeTransferFrom(msg.sender, address(this), amount);
         magnifiedStableDividendPerShare += (amount * MAGNITUDE) / totalSupply();
         emit StableDividendsDistributed(msg.sender, amount);
     }
@@ -112,56 +125,41 @@ contract StarlinkRwaToken is ERC20, Ownable, ReentrancyGuard {
         uint256 amount = stableDividendsOwed(msg.sender);
         if (amount == 0) revert ZeroAmount();
         stableDividendsClaimed[msg.sender] += amount;
-        bool ok = dividendStablecoin.transfer(msg.sender, amount);
-        if (!ok) revert TransferFailed();
+        dividendStablecoin.safeTransfer(msg.sender, amount);
         emit StableDividendsClaimed(msg.sender, amount);
     }
 
     function nativeDividendsOwed(address account) public view returns (uint256) {
-        return _dividendsOwed(
-            account,
-            magnifiedNativeDividendPerShare,
-            nativeDividendCorrections[account],
-            nativeDividendsClaimed[account]
-        );
+        return _dividendsOwed(account, magnifiedNativeDividendPerShare, nativeDividendCorrections[account], nativeDividendsClaimed[account]);
     }
 
     function stableDividendsOwed(address account) public view returns (uint256) {
-        return _dividendsOwed(
-            account,
-            magnifiedStableDividendPerShare,
-            stableDividendCorrections[account],
-            stableDividendsClaimed[account]
-        );
+        return _dividendsOwed(account, magnifiedStableDividendPerShare, stableDividendCorrections[account], stableDividendsClaimed[account]);
     }
 
-    function _dividendsOwed(
-        address account,
-        uint256 perShare,
-        int256 correction,
-        uint256 claimed
-    ) internal view returns (uint256) {
+    function _dividendsOwed(address account, uint256 perShare, int256 correction, uint256 claimed)
+        internal
+        view
+        returns (uint256)
+    {
         int256 accumulated = int256((balanceOf(account) * perShare) / MAGNITUDE) + correction;
         if (accumulated <= int256(claimed)) return 0;
         return uint256(accumulated) - claimed;
     }
 
-    /** @dev Enforces KYC restrictions and preserves dividend entitlement on transfers. */
+    /** @dev Applies KYC restrictions, pause state, and dividend corrections. */
     function _update(address from, address to, uint256 value) internal override {
+        if (paused() && !emergencyRecoveryInProgress) revert EnforcedPause();
         if (from != address(0) && !isWhitelisted[from]) revert NotWhitelisted(from);
         if (to != address(0) && !isWhitelisted[to]) revert NotWhitelisted(to);
 
         if (from != address(0)) {
-            int256 nativeCorrection = int256(value * magnifiedNativeDividendPerShare);
-            int256 stableCorrection = int256(value * magnifiedStableDividendPerShare);
-            nativeDividendCorrections[from] += nativeCorrection;
-            stableDividendCorrections[from] += stableCorrection;
+            nativeDividendCorrections[from] += int256(value * magnifiedNativeDividendPerShare);
+            stableDividendCorrections[from] += int256(value * magnifiedStableDividendPerShare);
         }
         if (to != address(0)) {
-            int256 nativeCorrection = int256(value * magnifiedNativeDividendPerShare);
-            int256 stableCorrection = int256(value * magnifiedStableDividendPerShare);
-            nativeDividendCorrections[to] -= nativeCorrection;
-            stableDividendCorrections[to] -= stableCorrection;
+            nativeDividendCorrections[to] -= int256(value * magnifiedNativeDividendPerShare);
+            stableDividendCorrections[to] -= int256(value * magnifiedStableDividendPerShare);
         }
         super._update(from, to, value);
     }
