@@ -38,6 +38,8 @@ const recoveryForm = $("#recoveryForm");
 const lostWalletInput = $("#lostWalletInput");
 const newWalletInput = $("#newWalletInput");
 const recoveryMessage = $("#recoveryMessage");
+const contractStatus = $("#contractStatus");
+const unpauseButton = $("#unpauseButton");
 const marketPrice = $("#marketPrice");
 const marketChange = $("#marketChange");
 const marketStatus = $("#marketStatus");
@@ -128,6 +130,29 @@ async function refreshTransferAudit() {
     renderTransferAudit(balance, supply, owner, state.account);
   } catch {
     if (transferPreflight) transferPreflight.textContent = "Audit on-chain temporairement indisponible.";
+  }
+}
+
+function renderContractStatus(isPaused, connectedAccount, owner) {
+  if (!contractStatus) return;
+  contractStatus.className = `contract-status ${isPaused ? "status-paused" : "status-active"}`;
+  contractStatus.textContent = isPaused ? "⚠️ PROTOCOLE GELÉ - Transferts bloqués" : "✓ Protocole Actif";
+  if (pauseButton) pauseButton.disabled = isPaused || !connectedAccount || connectedAccount.toLowerCase() !== owner.toLowerCase();
+  if (unpauseButton) unpauseButton.disabled = !isPaused || !connectedAccount || connectedAccount.toLowerCase() !== owner.toLowerCase();
+}
+
+async function refreshContractStatus() {
+  try {
+    const deployment = await loadDeployment();
+    const readProvider = state.provider || new ethers.JsonRpcProvider(TARGET_CHAIN.rpcUrls[0]);
+    const contract = state.contract || new ethers.Contract(deployment.contractAddress, deployment.abi, readProvider);
+    const [isPaused, owner] = await Promise.all([contract.paused(), contract.owner()]);
+    renderContractStatus(isPaused, state.account, owner);
+  } catch {
+    if (contractStatus) {
+      contractStatus.className = "contract-status status-loading";
+      contractStatus.textContent = "État du protocole indisponible · reconnectez le portefeuille.";
+    }
   }
 }
 
@@ -411,6 +436,7 @@ async function connectWallet() {
     connectButton.classList.replace("button-primary", "button-ghost");
     await refreshInvestor();
     await refreshTransferAudit();
+    await refreshContractStatus();
     await refreshWhitelistRegistry();
     feedback(claimMessage, "Portefeuille connecté · lecture directe du contrat.");
   } catch (error) {
@@ -526,14 +552,36 @@ pauseButton.addEventListener("click", async () => {
   try {
     const owner = await state.contract.owner();
     if (owner.toLowerCase() !== state.account.toLowerCase()) throw new Error(`Owner requis : ${shortAddress(owner)}`);
-    const tx = await state.contract.pause();
+    const tx = await state.contract.pause(await getGasOverrides());
     await tx.wait();
     feedback(pauseMessage, `Contrat gelé on-chain. Transaction : ${shortAddress(tx.hash)}.`);
     pauseButton.textContent = "Contrat gelé ✓";
+    await refreshContractStatus();
   } catch (error) {
     feedback(pauseMessage, error.shortMessage || error.reason || error.message || "Le gel a échoué.", true);
     pauseButton.disabled = false;
     pauseButton.textContent = "Urgence : Geler le contrat";
+  }
+});
+
+unpauseButton?.addEventListener("click", async () => {
+  if (!state.contract || !state.account) return feedback(pauseMessage, "Connectez d’abord le portefeuille Owner.", true);
+  unpauseButton.disabled = true;
+  unpauseButton.innerHTML = '<span class="loader"></span> Réactivation en cours...';
+  feedback(pauseMessage, "Confirmez la réactivation dans votre portefeuille...");
+  try {
+    const owner = await state.contract.owner();
+    if (owner.toLowerCase() !== state.account.toLowerCase()) throw new Error(`Owner requis : ${shortAddress(owner)}`);
+    if (!(await state.contract.paused())) throw new Error("Le contrat est déjà actif.");
+    const tx = await state.contract.unpause(await getGasOverrides());
+    await tx.wait();
+    feedback(pauseMessage, `✓ Protocole réactivé on-chain. Transaction : ${shortAddress(tx.hash)}.`);
+    await refreshContractStatus();
+  } catch (error) {
+    feedback(pauseMessage, error?.shortMessage || error?.reason || error?.message || "La réactivation a échoué.", true);
+    await refreshContractStatus();
+  } finally {
+    unpauseButton.innerHTML = "Réactiver le contrat (Unpause) →";
   }
 });
 
@@ -584,4 +632,5 @@ loadReferenceRate();
 scheduleKitInstallation();
 loadMarketState();
 refreshTransferAudit();
+refreshContractStatus();
 refreshWhitelistRegistry();
