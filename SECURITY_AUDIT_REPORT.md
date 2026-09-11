@@ -102,6 +102,6 @@ Le nouveau scan Slither ne remonte plus les observations Low de réentrance sur 
 
 ## 10. Statut de déploiement de la version renforcée
 
-La version renforcée modifie le bytecode et nécessite un **nouveau déploiement** pour activer `pause`, `unpause` et `emergencyRecoverTokens` sur la blockchain. L’adresse actuellement déployée `0xe52f7A50D7d000D011dE760CBdeB57363A029406` correspond à la version précédente du bytecode et ne doit pas être présentée comme intégrant ces nouvelles fonctions tant qu’un redeploiement et une migration documentée n’ont pas été réalisés.
+La version renforcée a été redéployée avec succès sur Arbitrum Sepolia. L’adresse officielle V2 est [`0x8f08e75BaAA54987cB5C0894d55817c41120f418`](https://sepolia.arbiscan.io/address/0x8f08e75BaAA54987cB5C0894d55817c41120f418). L’ABI publiée dans `frontend/deployment.json` contient `pause`, `unpause` et `emergencyRecoverTokens`.
 
-Le code renforcé, les tests, le frontend et cette documentation sont publiés dans le dépôt. Avant redeploiement, il faut décider de la stratégie de migration des 20 000 tokens et des droits économiques existants : un nouveau constructeur remint la supply initiale et ne migre pas automatiquement les soldes de l’ancien contrat. Cette décision doit être validée par le Owner et documentée avant toute action on-chain.
+Le code renforcé, les tests, le frontend et cette documentation sont publiés dans le dépôt. Le déploiement V2 remint la supply initiale et ne migre pas automatiquement les soldes ni les droits économiques de V1. Une procédure de migration des détenteurs V1 doit donc être validée par l’Owner avant toute distribution économique V2.

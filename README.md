@@ -22,7 +22,7 @@ Le contrat `StarlinkRwaToken` est déployé sur Arbitrum Sepolia et son bytecode
 |---|---|
 | Réseau | Arbitrum Sepolia |
 | Chain ID | `421614` |
-| Adresse du contrat | [`0xe52f7A50D7d000D011dE760CBdeB57363A029406`](https://sepolia.arbiscan.io/address/0xe52f7A50D7d000D011dE760CBdeB57363A029406) |
+| Adresse du contrat V2 | [`0x8f08e75BaAA54987cB5C0894d55817c41120f418`](https://sepolia.arbiscan.io/address/0x8f08e75BaAA54987cB5C0894d55817c41120f418) |
 | Nom | `SMAXO Starlink Chad` |
 | Symbole | `SMAXOF1` |
 | Décimales | `0` |
@@ -131,6 +131,6 @@ Les secrets de déploiement ne doivent jamais être commités : `DEPLOYER_PRIVAT
 
 Une version renforcée du contrat est maintenant présente dans `contracts/StarlinkRwaToken.sol`. Elle fige le pragma du contrat principal sur Solidity `0.8.20`, utilise `SafeERC20`, protège `distributeStablecoin()` par `nonReentrant` et ajoute `Pausable` ainsi que `emergencyRecoverTokens(lostAddress, newAddress)`. La récupération est volontairement limitée au mode pause, à l’Owner et à deux adresses whitelistées.
 
-La suite de tests renforcée comporte six tests passants. Le frontend contient les contrôles Owner **Urgence : Geler le contrat** et **Récupération d’un portefeuille perdu**. Tant que le nouveau bytecode n’est pas déployé, ces contrôles affichent que la fonction sera disponible après redeploiement ; ils ne simulent pas une action on-chain.
+La suite de tests renforcée comporte six tests passants. Le frontend contient les contrôles Owner **Urgence : Geler le contrat** et **Récupération d’un portefeuille perdu**. Ces contrôles utilisent désormais l’ABI et l’adresse du contrat V2 publiées dans `frontend/deployment.json`.
 
-> **Migration requise.** Le contrat actuellement publié à l’adresse [`0xe52f7A50D7d000D011dE760CBdeB57363A029406`](https://sepolia.arbiscan.io/address/0xe52f7A50D7d000D011dE760CBdeB57363A029406) est la version précédente et ne possède pas encore les fonctions de pause/récupération. Le nouveau contrat remint sa supply initiale lors du déploiement et ne migre pas automatiquement les soldes ni les droits économiques de l’ancien contrat. Le redeploiement et la migration doivent donc être approuvés et documentés séparément avant toute transaction on-chain.
+> **Migration V1 → V2.** Le contrat V2 remint sa supply initiale lors du déploiement et ne migre pas automatiquement les soldes ni les droits économiques de l’ancien contrat V1. Les détenteurs V1 doivent donc être onboardés et whitelistés selon une procédure de migration documentée avant toute émission ou distribution économique V2.
