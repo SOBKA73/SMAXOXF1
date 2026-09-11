@@ -127,17 +127,27 @@ whitelistForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!state.contract) return feedback(whitelistMessage, "Connectez d’abord le portefeuille gestionnaire.", true);
   const value = walletInput.value.trim();
-  if (!ethers.isAddress(value)) return feedback(whitelistMessage, "Saisissez une adresse Ethereum valide.", true);
+  let targetAddress;
+  try {
+    targetAddress = ethers.getAddress(value.toLowerCase());
+  } catch {
+    return feedback(whitelistMessage, "Saisissez une adresse Ethereum valide.", true);
+  }
   const submit = whitelistForm.querySelector("button");
   submit.disabled = true;
   submit.innerHTML = '<span class="loader"></span> Validation on-chain...';
   try {
-    const tx = await state.contract.setWhitelist(value, true);
+    const owner = await state.contract.owner();
+    if (owner.toLowerCase() !== state.account.toLowerCase()) {
+      throw new Error(`Owner requis. Owner actuel : ${shortAddress(owner)}`);
+    }
+    const tx = await state.contract.setWhitelist(targetAddress, true);
     await tx.wait();
-    feedback(whitelistMessage, `✓ ${shortAddress(value)} a été whitelisté. Transaction : ${shortAddress(tx.hash)}.`);
+    feedback(whitelistMessage, `✓ ${shortAddress(targetAddress)} a été whitelisté. Transaction : ${shortAddress(tx.hash)}.`);
     walletInput.value = "";
   } catch (error) {
-    feedback(whitelistMessage, error.shortMessage || error.reason || "La whitelist a échoué : Owner requis.", true);
+    const reason = error?.shortMessage || error?.reason || error?.info?.error?.message || error?.message;
+    feedback(whitelistMessage, reason || "La whitelist a échoué : Owner requis.", true);
   } finally {
     submit.disabled = false;
     submit.innerHTML = "Approuver l'adresse <span>→</span>";
