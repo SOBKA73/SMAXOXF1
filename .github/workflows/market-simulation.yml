@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: market-simulation-main
@@ -39,4 +41,15 @@ jobs:
           else
             git commit -m "🤖 Cloud Cron: Update SMAXOF1 market price"
             git push origin HEAD:main
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload frontend artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend
+
+      - name: Deploy frontend to GitHub Pages
+        uses: actions/deploy-pages@v4
           fi
