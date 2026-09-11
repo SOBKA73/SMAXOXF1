@@ -60,6 +60,19 @@
         </div>
       </section>
 
+      <section id="market" class="section-block">
+        <div class="section-heading"><div><div class="eyebrow">MARCHÉ CLOUD · SMAXOF1</div><h2>Le prix, heure après heure.</h2></div><span class="section-index" id="marketUpdatedAt">SYNCHRONISATION...</span></div>
+        <div class="market-grid">
+          <article class="card market-card"><div class="card-top"><div><span class="metric-label">Prix indicatif</span><h3 id="marketPrice">500,00 XAF</h3></div><span id="marketChange" class="chip chip-green">+0,00%</span></div><p id="marketStatus">Index cloud transparent, sans valeur de marché garantie.</p><canvas id="marketChart" aria-label="Historique indicatif du prix SMAXOF1"></canvas></article>
+          <div class="metric-grid transparency-grid">
+            <article class="metric-card card"><span class="metric-label">Capital physique</span><strong id="physicalCapital">—</strong><span class="metric-unit">XAF · CAPEX fixe</span></article>
+            <article class="metric-card card"><span class="metric-label">Trésorerie opérationnelle</span><strong id="operationalTreasury">—</strong><span class="metric-unit">XAF · OPEX fixe</span></article>
+            <article class="metric-card card metric-highlight"><span class="metric-label">Liquidité disponible</span><strong id="availableLiquidity">—</strong><span class="metric-unit">XAF · bénéfices simulés</span></article>
+            <article class="metric-card card"><span class="metric-label">Cap table</span><strong id="capTableSummary">50 / 50</strong><span class="metric-unit">Fondateur / investisseurs</span></article>
+          </div>
+        </div>
+      </section>
+
       <section id="investor" class="section-block">
         <div class="section-heading"><div><div class="eyebrow">02 / ESPACE INVESTISSEUR</div><h2>Votre position, en un coup d'œil.</h2></div><span class="section-index">WALLET CONNECTÉ</span></div>
         <div class="investor-grid">
@@ -101,8 +114,9 @@
       </section>
     </main>
 
-    <footer class="site-footer container"><span>© 2026 SMAXO Starlink Chad</span><span>Prototype d'interface · Données simulées</span><span>Arbitrum-ready <span class="footer-dot"></span></span></footer>
+    <footer class="site-footer container"><span>© 2026 SMAXO Starlink Chad</span><span>Index cloud · Données transparentes simulées</span><span>Arbitrum-ready <span class="footer-dot"></span></span></footer>
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

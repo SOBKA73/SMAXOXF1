@@ -134,3 +134,13 @@ Une version renforcée du contrat est maintenant présente dans `contracts/Starl
 La suite de tests renforcée comporte six tests passants. Le frontend contient les contrôles Owner **Urgence : Geler le contrat** et **Récupération d’un portefeuille perdu**. Ces contrôles utilisent désormais l’ABI et l’adresse du contrat V2 publiées dans `frontend/deployment.json`.
 
 > **Migration V1 → V2.** Le contrat V2 remint sa supply initiale lors du déploiement et ne migre pas automatiquement les soldes ni les droits économiques de l’ancien contrat V1. Les détenteurs V1 doivent donc être onboardés et whitelistés selon une procédure de migration documentée avant toute émission ou distribution économique V2.
+
+## Simulation cloud du marché SMAXOF1
+
+Le fichier [`market_cron.py`](market_cron.py) met à jour un index indicatif du prix SMAXOF1 à partir du dernier prix enregistré dans [`market_state.json`](market_state.json). Chaque exécution applique une variation aléatoire bornée entre **-1,2 % et +1,8 %**, selon un tirage normal centré sur une légère dérive positive. Cet index est une simulation transparente pour la présentation : il ne constitue pas un oracle de prix, ne crée aucune transaction et ne garantit aucune valeur de marché.
+
+Le même état publie le bilan RWA de démonstration : **8 000 000 XAF** de capital physique, **2 000 000 XAF** de trésorerie opérationnelle, **10 710 000 XAF** de liquidité disponible simulée et une cap table **50 % fondateur / 50 % investisseurs**, soit 10 000 000 XAF par bloc.
+
+Le workflow [`market-simulation.yml`](.github/workflows/market-simulation.yml) s’exécute toutes les heures à la minute 17 ou manuellement via `workflow_dispatch`. Il installe Python, exécute le script, puis commit uniquement `market_state.json` avec le message `🤖 Cloud Cron: Update SMAXOF1 market price`. Le push déclenche ensuite la publication GitHub Pages.
+
+Le dashboard charge `market_state.json` sans cache, affiche le dernier prix et sa variation en vert ou rouge, trace l’historique avec Chart.js et présente les quatre cartes de transparence du bilan. Une exécution horaire peut donc générer une nouvelle publication du dashboard sans intervention manuelle.

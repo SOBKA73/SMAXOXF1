@@ -29,12 +29,63 @@ const recoveryForm = $("#recoveryForm");
 const lostWalletInput = $("#lostWalletInput");
 const newWalletInput = $("#newWalletInput");
 const recoveryMessage = $("#recoveryMessage");
+const marketPrice = $("#marketPrice");
+const marketChange = $("#marketChange");
+const marketStatus = $("#marketStatus");
+const marketUpdatedAt = $("#marketUpdatedAt");
+const physicalCapital = $("#physicalCapital");
+const operationalTreasury = $("#operationalTreasury");
+const availableLiquidity = $("#availableLiquidity");
+const capTableSummary = $("#capTableSummary");
+const marketChartCanvas = $("#marketChart");
+let marketChart;
 const formatNumber = (value) => new Intl.NumberFormat("fr-FR").format(value);
+const formatPrice = (value) => new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
 const shortAddress = (address) => `${address.slice(0, 6)}...${address.slice(-4)}`;
 
 function feedback(target, text, error = false) {
   target.textContent = text;
   target.classList.toggle("error", error);
+}
+
+async function loadMarketState() {
+  try {
+    const response = await fetch("market_state.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("market_state.json indisponible");
+    const state = await response.json();
+    const transparency = state.transparency || {};
+    const capTable = transparency.cap_table || {};
+    const change = Number(state.change_pct || 0);
+    marketPrice.textContent = `${formatPrice(Number(state.current_price_xaf || 500))} XAF`;
+    marketChange.textContent = `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`;
+    marketChange.classList.toggle("chip-green", change >= 0);
+    marketChange.classList.toggle("chip-red", change < 0);
+    marketStatus.textContent = `${change >= 0 ? "Hausse" : "Baisse"} cloud · index indicatif, sans valeur de marché garantie.`;
+    marketUpdatedAt.textContent = state.updated_at ? `MIS À JOUR ${new Date(state.updated_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}` : "EN ATTENTE";
+    physicalCapital.textContent = formatNumber(transparency.physical_capital_xaf || 0);
+    operationalTreasury.textContent = formatNumber(transparency.operational_treasury_xaf || 0);
+    availableLiquidity.textContent = formatNumber(transparency.available_liquidity_xaf || 0);
+    capTableSummary.textContent = `${capTable.founder?.share_pct || 50} / ${capTable.investors?.share_pct || 50}`;
+    if (!window.Chart || !marketChartCanvas) return;
+    const history = state.history || [];
+    if (marketChart) marketChart.destroy();
+    marketChart = new Chart(marketChartCanvas, {
+      type: "line",
+      data: {
+        labels: history.map((point) => new Date(point.timestamp).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })),
+        datasets: [{ data: history.map((point) => point.price_xaf), borderColor: change >= 0 ? "#7cf0bf" : "#ff9aaf", backgroundColor: change >= 0 ? "rgba(124,240,191,.12)" : "rgba(255,154,175,.12)", fill: true, tension: 0.35, pointRadius: 2, pointBackgroundColor: change >= 0 ? "#7cf0bf" : "#ff9aaf" }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => `${formatPrice(context.parsed.y)} XAF` } } },
+        scales: { x: { display: false }, y: { ticks: { color: "#969ab0", callback: (value) => `${formatPrice(value)} XAF` }, grid: { color: "rgba(255,255,255,.06)" } } },
+      },
+    });
+  } catch (error) {
+    marketStatus.textContent = "Données cloud indisponibles · rechargez la page après la publication.";
+    marketStatus.classList.add("error");
+  }
 }
 
 function resetInvestor() {
@@ -221,3 +272,4 @@ const loaderStyle = document.createElement("style");
 loaderStyle.textContent = ".loader{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}";
 document.head.appendChild(loaderStyle);
 resetInvestor();
+loadMarketState();
