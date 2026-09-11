@@ -1,0 +1,29 @@
+name: Transfer SMAXO contract ownership
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  transfer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Transfer ownership and verify
+        env:
+          ARBITRUM_SEPOLIA_RPC_URL: https://sepolia-rollup.arbitrum.io/rpc
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+        run: npx hardhat run scripts/transfer_owner.js --network arbitrumSepolia
