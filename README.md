@@ -196,3 +196,16 @@ Cette URL suit la version publiée sur `main` et permet d’ouvrir le dashboard 
 Pour la présentation INSEEC, le frontend GitHub Pages utilise un mode de simulation contrôlée : aucune clé privée, aucune transaction réelle et aucun fonds ne sont nécessaires. L’interface reproduit les états MetaMask/Ethers.js avec le portefeuille de démonstration `0x7fc05911b8eE165dA41F60fB90a971af14b6F7C5`, le réseau Arbitrum Sepolia simulé, l’affichage des 100 tokens, le claim des `53 550 XAF` et la validation visuelle de la whitelist ARCEP Tchad.
 
 Ce mode est distinct du smart contract Solidity : il est destiné à une démonstration utilisateur fiable lorsque le wallet Testnet ne dispose pas d’ETH de gas. Les opérations sont locales au navigateur et ne produisent aucun effet on-chain.
+
+## Déploiement réel — Arbitrum Sepolia
+
+Le contrat `StarlinkRwaToken` est déployé sur le Testnet Arbitrum Sepolia. Le frontend utilise désormais Ethers.js et le fichier `frontend/deployment.json` pour lire le solde, vérifier la whitelist KYC, réclamer les dividendes stablecoin et appeler `setWhitelist` depuis le portefeuille Owner.
+
+- **Adresse du contrat :** [`0xe52f7A50D7d000D011dE760CBdeB57363A029406`](https://sepolia.arbiscan.io/address/0xe52f7A50D7d000D011dE760CBdeB57363A029406)
+- **Réseau :** Arbitrum Sepolia
+- **Chain ID :** `421614`
+- **Owner :** `0x7fc05911b8E165dA41F60fB90a971afF14B6f7C5`
+- **Supply totale :** `20 000 SMAXOF1`
+- **Stablecoin configuré :** `0x75Faf114eAFb1bdbe2F772238734f1841c610214`
+
+Les actions `claimStableDividends()` et `setWhitelist()` nécessitent respectivement une entitlement de dividendes et un portefeuille Owner/KYC autorisé. Le site ne simule plus ces appels lorsque les métadonnées du déploiement sont disponibles.
