@@ -23,6 +23,10 @@ const claimMessage = $("#claimMessage");
 const whitelistForm = $("#whitelistForm");
 const walletInput = $("#walletInput");
 const whitelistMessage = $("#whitelistMessage");
+const transferForm = $("#transferForm");
+const transferWalletInput = $("#transferWalletInput");
+const transferAmountInput = $("#transferAmountInput");
+const transferMessage = $("#transferMessage");
 const pauseButton = $("#pauseButton");
 const pauseMessage = $("#pauseMessage");
 const recoveryForm = $("#recoveryForm");
@@ -227,6 +231,15 @@ function showToast(message) {
   window.setTimeout(() => toast.remove(), 5000);
 }
 
+function showTransferSuccess(hash, recipient, amount) {
+  const modal = document.createElement("div");
+  modal.className = "success-modal-backdrop";
+  modal.innerHTML = `<div class="success-modal" role="dialog" aria-modal="true" aria-labelledby="transferSuccessTitle"><div class="success-mark">✓</div><span class="metric-label">TRANSACTION CONFIRMÉE</span><h3 id="transferSuccessTitle">Transfert de parts validé</h3><p>${amount} SMAXOF1 envoyé(s) à ${shortAddress(recipient)}.</p><a class="button button-primary button-full" href="https://sepolia.arbiscan.io/tx/${hash}" target="_blank" rel="noopener">Voir la transaction ↗</a><button class="button button-ghost button-full" type="button">Fermer</button></div>`;
+  modal.querySelector("button")?.addEventListener("click", () => modal.remove());
+  modal.addEventListener("click", (event) => { if (event.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
 function updateKitTracker() {
   if (kitCount >= 15) return;
   kitCount += 1;
@@ -378,6 +391,47 @@ whitelistForm.addEventListener("submit", async (event) => {
   } finally {
     submit.disabled = false;
     submit.innerHTML = "Approuver l'adresse <span>→</span>";
+  }
+});
+
+transferForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!state.contract || !state.account) return feedback(transferMessage, "Connectez d’abord le portefeuille gestionnaire.", true);
+  const rawAddress = transferWalletInput.value.trim().replace(/^0x0x/i, "0x");
+  const amount = Number(transferAmountInput.value);
+  let recipient;
+  try {
+    recipient = ethers.getAddress(rawAddress);
+  } catch {
+    return feedback(transferMessage, "Adresse invalide : utilisez une adresse publique Ethereum commençant par 0x.", true);
+  }
+  if (!Number.isSafeInteger(amount) || amount <= 0) return feedback(transferMessage, "Saisissez un nombre entier de tokens supérieur à zéro.", true);
+  const submit = transferForm.querySelector("button[type=submit]");
+  submit.disabled = true;
+  submit.innerHTML = '<span class="loader"></span> Signature du transfert...';
+  try {
+    const owner = await state.contract.owner();
+    if (owner.toLowerCase() !== state.account.toLowerCase()) throw new Error(`Owner requis : ${shortAddress(owner)}`);
+    const [senderBalance, recipientWhitelisted] = await Promise.all([
+      state.contract.balanceOf(state.account),
+      state.contract.isWhitelisted(recipient),
+    ]);
+    if (!recipientWhitelisted) throw new Error("Le destinataire doit être whitelisté avant le transfert.");
+    if (senderBalance < BigInt(amount)) throw new Error(`Solde insuffisant : ${senderBalance.toString()} SMAXOF1 disponibles.`);
+    const tx = await state.contract.transfer(recipient, BigInt(amount));
+    feedback(transferMessage, "Transaction envoyée · attente de confirmation blockchain...");
+    await tx.wait();
+    transferWalletInput.value = "";
+    transferAmountInput.value = "";
+    feedback(transferMessage, `✓ Transfert confirmé · ${shortAddress(tx.hash)}.`);
+    showTransferSuccess(tx.hash, recipient, amount);
+    await refreshInvestor();
+  } catch (error) {
+    const reason = error?.shortMessage || error?.reason || error?.info?.error?.message || error?.message;
+    feedback(transferMessage, reason || "Le transfert n’a pas pu être validé.", true);
+  } finally {
+    submit.disabled = false;
+    submit.innerHTML = "Valider le transfert de parts <span>→</span>";
   }
 });
 

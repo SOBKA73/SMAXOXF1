@@ -108,3 +108,9 @@ h1 { font-size: clamp(48px, 6.2vw, 82px); line-height: 1.02; margin: 22px 0; }
 .activity-toast { padding: 14px 16px; border: 1px solid rgba(124,240,191,.35); border-radius: 11px; color: #e6fff5; background: rgba(13,36,35,.96); box-shadow: 0 16px 35px rgba(0,0,0,.28); font-size: 12px; animation: toast-in .3s ease both; }
 @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 800px) { .operations-grid { grid-template-columns: 1fr; } .conversion-switch { align-items: flex-start; flex-direction: column; } .critical-alert { top: 76px; } }
+.success-modal-backdrop { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(4,5,13,.78); backdrop-filter: blur(10px); }
+.success-modal { width: min(420px, 100%); padding: 30px; border: 1px solid rgba(124,240,191,.35); border-radius: 20px; background: linear-gradient(145deg, rgba(30,39,58,.98), rgba(18,20,38,.98)); box-shadow: 0 30px 90px rgba(0,0,0,.48); text-align: center; }
+.success-mark { display: grid; place-items: center; width: 48px; height: 48px; margin: 0 auto 17px; border-radius: 50%; color: #08251b; background: var(--green); box-shadow: 0 0 0 8px rgba(124,240,191,.1); font-size: 25px; font-weight: 800; }
+.success-modal h3 { margin: 10px 0 8px; font-size: 25px; }
+.success-modal p { margin: 0 0 22px; color: var(--muted); font-size: 12px; }
+.success-modal .button { margin-top: 9px; }
