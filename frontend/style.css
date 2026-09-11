@@ -124,3 +124,10 @@ h1 { font-size: clamp(48px, 6.2vw, 82px); line-height: 1.02; margin: 22px 0; }
 .registry-approved { color: var(--green); font-size: 9px; font-weight: 800; letter-spacing: .1em; }
 .registry-empty { color: var(--muted); font-size: 12px; }
 .registry-error { color: #ff9aaf; }
+.transfer-audit { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0 10px; }
+.transfer-audit div { padding: 10px; border: 1px solid var(--border); border-radius: 9px; background: rgba(4,6,15,.28); }
+.transfer-audit span { display: block; color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
+.transfer-audit strong { display: block; margin-top: 4px; color: var(--green); font-family: "Space Grotesk"; font-size: 14px; }
+.transfer-preflight { min-height: 18px; margin: 0 0 10px; color: var(--muted); font-size: 10px; }
+.transfer-preflight.success { color: var(--green); }.transfer-preflight.warning { color: #e3c77d; }.transfer-preflight.error { color: #ff9aaf; }
+@media (max-width: 460px) { .transfer-audit { grid-template-columns: 1fr; } }

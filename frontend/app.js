@@ -27,6 +27,9 @@ const transferForm = $("#transferForm");
 const transferWalletInput = $("#transferWalletInput");
 const transferAmountInput = $("#transferAmountInput");
 const transferMessage = $("#transferMessage");
+const adminTokenBalance = $("#adminTokenBalance");
+const totalTokenSupply = $("#totalTokenSupply");
+const transferPreflight = $("#transferPreflight");
 const whitelistRegistry = $("#whitelistRegistry");
 const registryStatus = $("#registryStatus");
 const pauseButton = $("#pauseButton");
@@ -94,6 +97,38 @@ async function getGasOverrides() {
     maxPriorityFeePerGas: priority,
     maxFeePerGas: suggestedMax > baseFee * 2n + priority ? suggestedMax : baseFee * 2n + priority,
   };
+}
+
+function renderTransferAudit(balance, supply, owner, connectedAccount) {
+  if (adminTokenBalance) adminTokenBalance.textContent = `${balance.toString()} SMAXOF1`;
+  if (totalTokenSupply) totalTokenSupply.textContent = `${supply.toString()} SMAXOF1`;
+  if (!transferPreflight) return;
+  if (!connectedAccount) {
+    transferPreflight.textContent = `Owner attendu : ${shortAddress(owner)} · Connectez ce portefeuille pour transférer.`;
+    transferPreflight.className = "transfer-preflight warning";
+  } else if (connectedAccount.toLowerCase() !== owner.toLowerCase()) {
+    transferPreflight.textContent = `Mauvais compte connecté · Owner attendu : ${shortAddress(owner)}.`;
+    transferPreflight.className = "transfer-preflight error";
+  } else if (balance === 0n) {
+    transferPreflight.textContent = "Réserve Owner vide : aucun transfert possible depuis ce portefeuille.";
+    transferPreflight.className = "transfer-preflight error";
+  } else {
+    transferPreflight.textContent = `Réserve disponible · ${balance.toString()} parts transférables depuis l’Owner.`;
+    transferPreflight.className = "transfer-preflight success";
+  }
+}
+
+async function refreshTransferAudit() {
+  try {
+    const deployment = await loadDeployment();
+    const readProvider = state.provider || new ethers.JsonRpcProvider(TARGET_CHAIN.rpcUrls[0]);
+    const contract = state.contract || new ethers.Contract(deployment.contractAddress, deployment.abi, readProvider);
+    const owner = await contract.owner();
+    const [balance, supply] = await Promise.all([contract.balanceOf(owner), contract.totalSupply()]);
+    renderTransferAudit(balance, supply, owner, state.account);
+  } catch {
+    if (transferPreflight) transferPreflight.textContent = "Audit on-chain temporairement indisponible.";
+  }
 }
 
 async function loadMarketState() {
@@ -375,6 +410,7 @@ async function connectWallet() {
     connectButton.textContent = `${shortAddress(state.account)} · Connecté`;
     connectButton.classList.replace("button-primary", "button-ghost");
     await refreshInvestor();
+    await refreshTransferAudit();
     await refreshWhitelistRegistry();
     feedback(claimMessage, "Portefeuille connecté · lecture directe du contrat.");
   } catch (error) {
@@ -459,6 +495,8 @@ transferForm?.addEventListener("submit", async (event) => {
       state.contract.balanceOf(state.account),
       state.contract.isWhitelisted(recipient),
     ]);
+    const totalSupply = await state.contract.totalSupply();
+    renderTransferAudit(senderBalance, totalSupply, owner, state.account);
     if (!recipientWhitelisted) throw new Error("Le destinataire doit être whitelisté avant le transfert.");
     if (senderBalance < BigInt(amount)) throw new Error(`Solde insuffisant : ${senderBalance.toString()} SMAXOF1 disponibles.`);
     const tx = await state.contract.transfer(recipient, BigInt(amount), await getGasOverrides());
@@ -469,6 +507,7 @@ transferForm?.addEventListener("submit", async (event) => {
     feedback(transferMessage, `✓ Transfert confirmé · ${shortAddress(tx.hash)}.`);
     showTransferSuccess(tx.hash, recipient, amount);
     await refreshInvestor();
+    await refreshTransferAudit();
     await refreshWhitelistRegistry();
   } catch (error) {
     const reason = error?.shortMessage || error?.reason || error?.info?.error?.message || error?.message;
@@ -544,4 +583,5 @@ updateConversion();
 loadReferenceRate();
 scheduleKitInstallation();
 loadMarketState();
+refreshTransferAudit();
 refreshWhitelistRegistry();

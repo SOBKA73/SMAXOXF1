@@ -127,6 +127,8 @@
             </form>
             <form id="transferForm" class="card whitelist-form">
               <label for="transferWalletInput">Émettre / Transférer des parts sociales</label>
+              <div class="transfer-audit" aria-live="polite"><div><span>Solde de l'Administrateur</span><strong id="adminTokenBalance">— SMAXOF1</strong></div><div><span>Supply Totale Actuelle</span><strong id="totalTokenSupply">— SMAXOF1</strong></div></div>
+              <div id="transferPreflight" class="transfer-preflight">Connectez le portefeuille Owner pour auditer la réserve.</div>
               <div class="input-wrap"><span>0x</span><input id="transferWalletInput" name="transferWallet" type="text" placeholder="Adresse publique du destinataire" autocomplete="off" required /></div>
               <div class="input-wrap"><span>Qté</span><input id="transferAmountInput" name="transferAmount" type="number" min="1" step="1" placeholder="Nombre de SMAXOF1" inputmode="numeric" required /></div>
               <button class="button button-primary button-full" type="submit">Valider le transfert de parts <span>→</span></button>
