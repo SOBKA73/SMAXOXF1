@@ -114,3 +114,13 @@ h1 { font-size: clamp(48px, 6.2vw, 82px); line-height: 1.02; margin: 22px 0; }
 .success-modal h3 { margin: 10px 0 8px; font-size: 25px; }
 .success-modal p { margin: 0 0 22px; color: var(--muted); font-size: 12px; }
 .success-modal .button { margin-top: 9px; }
+.registry-card { grid-column: 1 / -1; padding: 26px; }
+.registry-card h3 { margin-top: 8px; font-family: "Space Grotesk"; font-size: 20px; }
+.registry-intro { margin: 18px 0 12px; color: var(--muted); font-size: 12px; }
+.registry-list { display: grid; gap: 8px; max-height: 220px; overflow: auto; }
+.registry-entry { display: flex; align-items: center; gap: 10px; padding: 11px 13px; border: 1px solid rgba(124,240,191,.16); border-radius: 10px; background: rgba(4,6,15,.3); }
+.registry-entry code { flex: 1; color: #d9d6f1; font-family: "Space Grotesk", monospace; font-size: 11px; overflow: hidden; text-overflow: ellipsis; }
+.registry-dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+.registry-approved { color: var(--green); font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+.registry-empty { color: var(--muted); font-size: 12px; }
+.registry-error { color: #ff9aaf; }

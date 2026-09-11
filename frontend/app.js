@@ -27,6 +27,8 @@ const transferForm = $("#transferForm");
 const transferWalletInput = $("#transferWalletInput");
 const transferAmountInput = $("#transferAmountInput");
 const transferMessage = $("#transferMessage");
+const whitelistRegistry = $("#whitelistRegistry");
+const registryStatus = $("#registryStatus");
 const pauseButton = $("#pauseButton");
 const pauseMessage = $("#pauseMessage");
 const recoveryForm = $("#recoveryForm");
@@ -75,6 +77,23 @@ const shortAddress = (address) => `${address.slice(0, 6)}...${address.slice(-4)}
 function feedback(target, text, error = false) {
   target.textContent = text;
   target.classList.toggle("error", error);
+}
+
+function normalizeAddressInput(value) {
+  return String(value || "").trim().replace(/^(?:0x)+/i, "0x");
+}
+
+async function getGasOverrides() {
+  if (!state.provider) return {};
+  const feeData = await state.provider.getFeeData();
+  const latestBlock = await state.provider.getBlock("latest");
+  const baseFee = latestBlock?.baseFeePerGas || feeData.gasPrice || 0n;
+  const priority = feeData.maxPriorityFeePerGas || 1000000n;
+  const suggestedMax = feeData.maxFeePerGas || baseFee * 2n + priority;
+  return {
+    maxPriorityFeePerGas: priority,
+    maxFeePerGas: suggestedMax > baseFee * 2n + priority ? suggestedMax : baseFee * 2n + priority,
+  };
 }
 
 async function loadMarketState() {
@@ -290,6 +309,28 @@ async function loadDeployment() {
   return state.deployment;
 }
 
+async function refreshWhitelistRegistry() {
+  if (!whitelistRegistry) return;
+  try {
+    const deployment = await loadDeployment();
+    const readProvider = state.provider || new ethers.JsonRpcProvider(TARGET_CHAIN.rpcUrls[0]);
+    const contract = state.contract || new ethers.Contract(deployment.contractAddress, deployment.abi, readProvider);
+    let logs;
+    try {
+      logs = await contract.queryFilter(contract.filters.WhitelistUpdated(), -50000);
+    } catch {
+      logs = await contract.queryFilter(contract.filters.WhitelistUpdated(), -10000);
+    }
+    const candidates = [...new Set(logs.map((log) => log.args?.account).filter(Boolean).map((address) => ethers.getAddress(address)))];
+    const approved = (await Promise.all(candidates.map(async (address) => ({ address, approved: await contract.isWhitelisted(address) })))).filter((entry) => entry.approved).map((entry) => entry.address);
+    whitelistRegistry.innerHTML = approved.length ? approved.map((address) => `<div class="registry-entry"><span class="registry-dot"></span><code>${address}</code><span class="registry-approved">WHITELISTED</span></div>`).join("") : '<span class="registry-empty">Aucune adresse whitelistée détectée.</span>';
+    registryStatus.textContent = `${approved.length} ADRESSE${approved.length > 1 ? "S" : ""}`;
+  } catch (error) {
+    whitelistRegistry.innerHTML = '<span class="registry-empty registry-error">Registre temporairement indisponible · réessayez après connexion.</span>';
+    registryStatus.textContent = "EN ATTENTE";
+  }
+}
+
 async function ensureNetwork() {
   const network = await state.provider.getNetwork();
   if (network.chainId === TARGET_CHAIN_ID) return;
@@ -334,6 +375,7 @@ async function connectWallet() {
     connectButton.textContent = `${shortAddress(state.account)} · Connecté`;
     connectButton.classList.replace("button-primary", "button-ghost");
     await refreshInvestor();
+    await refreshWhitelistRegistry();
     feedback(claimMessage, "Portefeuille connecté · lecture directe du contrat.");
   } catch (error) {
     feedback(claimMessage, error.shortMessage || error.message || "Connexion impossible.", true);
@@ -369,7 +411,7 @@ whitelistForm.addEventListener("submit", async (event) => {
   const value = walletInput.value.trim();
   let targetAddress;
   try {
-    targetAddress = ethers.getAddress(value.toLowerCase());
+    targetAddress = ethers.getAddress(normalizeAddressInput(value));
   } catch {
     return feedback(whitelistMessage, "Saisissez une adresse Ethereum valide.", true);
   }
@@ -381,10 +423,11 @@ whitelistForm.addEventListener("submit", async (event) => {
     if (owner.toLowerCase() !== state.account.toLowerCase()) {
       throw new Error(`Owner requis. Owner actuel : ${shortAddress(owner)}`);
     }
-    const tx = await state.contract.setWhitelist(targetAddress, true);
+    const tx = await state.contract.setWhitelist(targetAddress, true, await getGasOverrides());
     await tx.wait();
     feedback(whitelistMessage, `✓ ${shortAddress(targetAddress)} a été whitelisté. Transaction : ${shortAddress(tx.hash)}.`);
     walletInput.value = "";
+    await refreshWhitelistRegistry();
   } catch (error) {
     const reason = error?.shortMessage || error?.reason || error?.info?.error?.message || error?.message;
     feedback(whitelistMessage, reason || "La whitelist a échoué : Owner requis.", true);
@@ -397,7 +440,7 @@ whitelistForm.addEventListener("submit", async (event) => {
 transferForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!state.contract || !state.account) return feedback(transferMessage, "Connectez d’abord le portefeuille gestionnaire.", true);
-  const rawAddress = transferWalletInput.value.trim().replace(/^0x0x/i, "0x");
+  const rawAddress = normalizeAddressInput(transferWalletInput.value);
   const amount = Number(transferAmountInput.value);
   let recipient;
   try {
@@ -418,7 +461,7 @@ transferForm?.addEventListener("submit", async (event) => {
     ]);
     if (!recipientWhitelisted) throw new Error("Le destinataire doit être whitelisté avant le transfert.");
     if (senderBalance < BigInt(amount)) throw new Error(`Solde insuffisant : ${senderBalance.toString()} SMAXOF1 disponibles.`);
-    const tx = await state.contract.transfer(recipient, BigInt(amount));
+    const tx = await state.contract.transfer(recipient, BigInt(amount), await getGasOverrides());
     feedback(transferMessage, "Transaction envoyée · attente de confirmation blockchain...");
     await tx.wait();
     transferWalletInput.value = "";
@@ -426,6 +469,7 @@ transferForm?.addEventListener("submit", async (event) => {
     feedback(transferMessage, `✓ Transfert confirmé · ${shortAddress(tx.hash)}.`);
     showTransferSuccess(tx.hash, recipient, amount);
     await refreshInvestor();
+    await refreshWhitelistRegistry();
   } catch (error) {
     const reason = error?.shortMessage || error?.reason || error?.info?.error?.message || error?.message;
     feedback(transferMessage, reason || "Le transfert n’a pas pu être validé.", true);
@@ -461,8 +505,8 @@ recoveryForm.addEventListener("submit", async (event) => {
   let lostAddress;
   let newAddress;
   try {
-    lostAddress = ethers.getAddress(lostWalletInput.value.trim().toLowerCase());
-    newAddress = ethers.getAddress(newWalletInput.value.trim().toLowerCase());
+    lostAddress = ethers.getAddress(normalizeAddressInput(lostWalletInput.value));
+    newAddress = ethers.getAddress(normalizeAddressInput(newWalletInput.value));
   } catch {
     return feedback(recoveryMessage, "Les deux adresses doivent être valides.", true);
   }
@@ -500,3 +544,4 @@ updateConversion();
 loadReferenceRate();
 scheduleKitInstallation();
 loadMarketState();
+refreshWhitelistRegistry();
