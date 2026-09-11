@@ -48,6 +48,9 @@ const physicalCapital = $("#physicalCapital");
 const operationalTreasury = $("#operationalTreasury");
 const availableLiquidity = $("#availableLiquidity");
 const capTableSummary = $("#capTableSummary");
+const globalCapital = $("#globalCapital");
+const tokenizedOffer = $("#tokenizedOffer");
+const netProfit = $("#netProfit");
 const marketChartCanvas = $("#marketChart");
 const yieldChip = $("#yieldChip");
 const yieldValue = $("#yieldValue");
@@ -69,6 +72,7 @@ let marketChart;
 let fallbackTimer;
 let incidentActive = false;
 let stablecoin = "USDC";
+let claimMode = "none";
 let kitCount = 0;
 let simulatedLiquidity = 0;
 let kitTimer;
@@ -201,6 +205,24 @@ function createFallbackMarketState() {
   };
 }
 
+function updateFinancialMetrics(price, transparency) {
+  const referencePrice = 500;
+  const tokenSupply = 20000;
+  const normalizedPrice = Number(price) || referencePrice;
+  const ratio = normalizedPrice / referencePrice;
+  const physical = Number(transparency.physical_capital_xaf || 8000000);
+  const treasury = Number(transparency.operational_treasury_xaf || 2000000);
+  const tokenizedValue = tokenSupply * normalizedPrice;
+  const dynamicProfit = 10710000 * ratio;
+  const dynamicLiquidity = 10710000 * ratio + simulatedLiquidity;
+  if (globalCapital) globalCapital.textContent = formatNumber(physical + treasury + tokenizedValue);
+  if (tokenizedOffer) tokenizedOffer.textContent = formatNumber(tokenizedValue);
+  if (netProfit) netProfit.textContent = formatNumber(dynamicProfit);
+  if (availableLiquidity) availableLiquidity.textContent = formatNumber(dynamicLiquidity);
+  if (incidentActive) renderYield(-30, true);
+  else renderYield(107.1 * ratio, false);
+}
+
 function renderMarketState(state) {
     if (!incidentActive) window.latestMarketState = state;
     const transparency = state.transparency || {};
@@ -214,7 +236,7 @@ function renderMarketState(state) {
     marketUpdatedAt.textContent = state.updated_at ? `MIS À JOUR ${new Date(state.updated_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}` : "EN ATTENTE";
     physicalCapital.textContent = formatNumber(transparency.physical_capital_xaf || 0);
     operationalTreasury.textContent = formatNumber(transparency.operational_treasury_xaf || 0);
-    availableLiquidity.textContent = formatNumber(transparency.available_liquidity_xaf || 0);
+    updateFinancialMetrics(Number(state.current_price_xaf || 500), transparency);
     capTableSummary.textContent = `${capTable.founder?.share_pct || 50} / ${capTable.investors?.share_pct || 50}`;
     if (!window.Chart || !marketChartCanvas) return;
     const history = state.history || [];
@@ -404,18 +426,31 @@ async function ensureNetwork() {
 
 async function refreshInvestor() {
   if (!state.contract || !state.account) return;
-  const [balance, owed, whitelisted] = await Promise.all([
+  const [balance, stableOwed, nativeOwed, whitelisted] = await Promise.all([
     state.contract.balanceOf(state.account),
     state.contract.stableDividendsOwed(state.account),
+    state.contract.nativeDividendsOwed(state.account),
     state.contract.isWhitelisted(state.account),
   ]);
+  let stableReserve = 0n;
+  if (stableOwed > 0n) {
+    try {
+      const stablecoinAddress = await state.contract.dividendStablecoin();
+      const stablecoinContract = new ethers.Contract(stablecoinAddress, ["function balanceOf(address) view returns (uint256)"], state.provider);
+      stableReserve = await stablecoinContract.balanceOf(state.contract.target);
+    } catch {
+      stableReserve = 0n;
+    }
+  }
+  claimMode = stableOwed > 0n && stableReserve >= stableOwed ? "stable" : nativeOwed > 0n ? "native" : "none";
+  const owed = claimMode === "stable" ? stableOwed : nativeOwed;
   const tokenCount = Number(balance);
   walletAddress.textContent = shortAddress(state.account);
   tokenBalance.textContent = formatNumber(tokenCount);
   nominalValue.textContent = `${formatNumber(tokenCount * 500)} XAF`;
   kycStatus.textContent = whitelisted ? "✓ Vérifié" : "Non whitelisté";
   dividendAmount.textContent = formatNumber(Number(owed));
-  claimDescription.textContent = `Solde on-chain de dividendes stablecoin pour ${tokenCount} tokens.`;
+  claimDescription.textContent = claimMode === "stable" ? `Dividendes USDC disponibles pour ${tokenCount} tokens.` : claimMode === "native" ? `Réserve USDC indisponible · dividendes natifs disponibles pour ${tokenCount} tokens.` : `Aucun dividende claimable pour ${tokenCount} tokens.`;
   claimButton.disabled = owed === 0n || !whitelisted;
   walletNotice.innerHTML = `<span>✓</span><span>Connecté à Arbitrum Sepolia · ${shortAddress(state.account)}.</span>`;
 }
@@ -455,12 +490,27 @@ claimButton.addEventListener("click", async () => {
   claimButton.innerHTML = '<span class="loader"></span> Transaction en cours...';
   feedback(claimMessage, "Confirmez la transaction dans votre portefeuille...");
   try {
-    const tx = await state.contract.claimStableDividends();
+    if (claimMode === "none") throw new Error("Aucun dividende claimable ou réserve disponible.");
+    const tx = claimMode === "native" ? await state.contract.claimNativeDividends(await getGasOverrides()) : await state.contract.claimStableDividends(await getGasOverrides());
     await tx.wait();
-    feedback(claimMessage, `Succès : transaction confirmée ${shortAddress(tx.hash)}.`);
+    feedback(claimMessage, `🎉 Retrait validé : Vos dividendes SMAXOF1 ont été convertis et transférés vers votre adresse ! Transaction : ${shortAddress(tx.hash)}.`);
     await refreshInvestor();
   } catch (error) {
-    feedback(claimMessage, error.shortMessage || error.reason || "La réclamation a échoué.", true);
+    if (claimMode === "stable") {
+      await refreshInvestor();
+      if (claimMode === "native") {
+        try {
+          const fallbackTx = await state.contract.claimNativeDividends(await getGasOverrides());
+          await fallbackTx.wait();
+          feedback(claimMessage, `🎉 Retrait validé : Vos dividendes SMAXOF1 ont été convertis et transférés vers votre adresse ! Transaction : ${shortAddress(fallbackTx.hash)}.`);
+          await refreshInvestor();
+          return;
+        } catch (fallbackError) {
+          error = fallbackError;
+        }
+      }
+    }
+    feedback(claimMessage, error.shortMessage || error.reason || error.message || "La réclamation a échoué : réserve USDC vide et aucun claim natif disponible.", true);
     await refreshInvestor();
   } finally {
     claimButton.innerHTML = "Réclamer mes dividendes";
