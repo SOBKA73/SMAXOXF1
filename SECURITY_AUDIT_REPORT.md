@@ -105,3 +105,28 @@ Le nouveau scan Slither ne remonte plus les observations Low de réentrance sur 
 La version renforcée a été redéployée avec succès sur Arbitrum Sepolia. L’adresse officielle V2 est [`0x8f08e75BaAA54987cB5C0894d55817c41120f418`](https://sepolia.arbiscan.io/address/0x8f08e75BaAA54987cB5C0894d55817c41120f418). L’ABI publiée dans `frontend/deployment.json` contient `pause`, `unpause` et `emergencyRecoverTokens`.
 
 Le code renforcé, les tests, le frontend et cette documentation sont publiés dans le dépôt. Le déploiement V2 remint la supply initiale et ne migre pas automatiquement les soldes ni les droits économiques de V1. Une procédure de migration des détenteurs V1 doit donc être validée par l’Owner avant toute distribution économique V2.
+
+## 11. Mise à niveau d’architecture — EIP-712 et gouvernance à double validation
+
+La version de travail suivante ajoute un mécanisme EIP-712 pour les décisions de whitelist. L’Owner signe hors chaîne une structure `Whitelist(account, approved, nonce, deadline)` dans le domaine `SMAXO Starlink Chad / 1`. Toute adresse ou tout relayer peut ensuite soumettre `whitelistWithSig(...)`. Le contrat vérifie le domaine, le nonce, la date limite et l’identité de l’Owner avant de modifier la whitelist. Ce mécanisme déplace la validation de signature hors chaîne et permet une soumission par le bénéficiaire ou un relayer ; il ne supprime pas le besoin d’une autorité de signature, car l’Owner reste le signataire de confiance.
+
+La récupération d’urgence n’est plus conçue comme une action Owner unique. L’Owner doit d’abord appeler `proposeEmergencyRecovery(lostAddress, newAddress)` lorsque le contrat est en pause. Un `guardian` distinct doit ensuite appeler `confirmEmergencyRecovery(lostAddress, newAddress, proposedAt)`. L’Owner peut enfin exécuter `emergencyRecoverTokens(...)` avec le timestamp de proposition. La séparation Owner/guardian réduit le risque de compromission d’une seule clé, sous réserve que le guardian soit lui-même sécurisé et que la multisignature soit mise en œuvre au niveau des comptes opérationnels.
+
+Ces protections ne sont pas rétroactives pour le contrat déjà déployé. Elles exigent une compilation, un redeploiement, une nouvelle adresse et une mise à jour vérifiée de `frontend/deployment.json`. Les détenteurs et droits économiques de l’ancien contrat ne sont pas automatiquement migrés.
+
+## 12. Incident opérationnel et état cloud
+
+Le frontend persiste désormais l’état local de l’incident dans `localStorage` et propose une résolution explicite. Le cron Python reconnaît également le fichier versionné `incident_state.json`. Lorsque `active` vaut `true`, `market_cron.py` conserve le prix pré-incident, applique un facteur de 70 %, publie `change_pct = -30.0` et ajoute `incident_active = true` à `market_state.json`. Lorsque l’état revient à `false`, le script restaure l’index pré-incident puis reprend la fluctuation horaire normale.
+
+Cette mécanique est un **simulateur opérationnel**, pas un oracle de marché et pas une transaction blockchain. L’action de déclenchement cloud doit être réalisée par une procédure administrateur contrôlée qui modifie `incident_state.json`, fait l’objet d’un commit signé et déclenche le workflow. Le bouton frontend constitue une simulation locale immédiate et la résolution locale restaure l’interface ; il ne doit pas être présenté comme une écriture authentifiée dans GitHub sans intégration backend disposant de contrôles d’accès.
+
+## 13. Vérifications à réaliser avant redeploiement
+
+Avant un redeploiement Arbitrum Sepolia, il faut exécuter la compilation Hardhat, les tests unitaires EIP-712 et guardian, une revue de l’ABI, un test de signature avec le domaine exact, un test d’expiration et de réutilisation de nonce, un test de proposition/confirmation/exécution avec deux comptes indépendants, puis un nouveau scan Slither et une revue indépendante. L’adresse du guardian doit être publiée et placée sous une politique de gestion de clés distincte de l’Owner.
+
+
+## 14. Note de build et statut de redeploiement
+
+La dépendance OpenZeppelin actuellement installée utilise des composants cryptographiques nécessitant Solidity `^0.8.24` et l’opcode `mcopy`. La configuration Hardhat de cette branche a donc été alignée sur Solidity `0.8.24` avec une cible EVM Cancun. La compilation et les huit tests Hardhat de la mise à niveau passent dans cet environnement.
+
+Le redeploiement Arbitrum Sepolia n’a pas été exécuté dans cette session, car les paramètres `ARBITRUM_SEPOLIA_RPC_URL`, `DEPLOYER_PRIVATE_KEY`, `DIVIDEND_STABLECOIN` et `GUARDIAN_ADDRESS` ne sont pas disponibles dans l’environnement local. L’adresse V2 actuellement référencée par le frontend correspond encore à l’ancien bytecode et ne doit pas être présentée comme supportant EIP-712 ou le guardian avant migration. Le script `scripts/deploy.js` accepte désormais `GUARDIAN_ADDRESS` et écrit le guardian dans les métadonnées de déploiement lors d’un redeploiement autorisé.

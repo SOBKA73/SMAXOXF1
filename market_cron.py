@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 STATE_PATH = Path(__file__).with_name("market_state.json")
+INCIDENT_PATH = Path(__file__).with_name("incident_state.json")
 INITIAL_PRICE_XAF = 500.0
 MIN_CHANGE_PCT = -1.2
 MAX_CHANGE_PCT = 1.8
@@ -43,6 +44,15 @@ def load_state() -> dict:
     return json.loads(STATE_PATH.read_text(encoding="utf-8"))
 
 
+def incident_is_active() -> bool:
+    if not INCIDENT_PATH.exists():
+        return False
+    try:
+        return bool(json.loads(INCIDENT_PATH.read_text(encoding="utf-8")).get("active", False))
+    except (OSError, json.JSONDecodeError):
+        return False
+
+
 def next_change_pct() -> float:
     # Normal distribution centred on a modest positive drift, clipped to the
     # requested realistic hourly range.
@@ -52,8 +62,19 @@ def next_change_pct() -> float:
 
 def update_state(state: dict) -> dict:
     previous = float(state.get("current_price_xaf", INITIAL_PRICE_XAF))
-    change_pct = next_change_pct()
-    current = round(previous * (1.0 + change_pct / 100.0), 2)
+    active = incident_is_active()
+    was_active = bool(state.get("incident_active", False))
+    if active and not was_active:
+        state["pre_incident_price_xaf"] = previous
+    if not active and was_active:
+        previous = float(state.get("pre_incident_price_xaf", previous))
+        state.pop("pre_incident_price_xaf", None)
+    if active:
+        current = round(float(state.get("pre_incident_price_xaf", previous)) * 0.70, 2)
+        change_pct = -30.0
+    else:
+        change_pct = next_change_pct()
+        current = round(previous * (1.0 + change_pct / 100.0), 2)
     timestamp = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
     history = list(state.get("history", []))
     history.append({"timestamp": timestamp, "price_xaf": current, "change_pct": change_pct})
@@ -64,6 +85,7 @@ def update_state(state: dict) -> dict:
             "current_price_xaf": current,
             "previous_price_xaf": previous,
             "change_pct": change_pct,
+            "incident_active": active,
             "updated_at": timestamp,
             "history": history[-MAX_HISTORY_POINTS:],
             "transparency": TRANSPARENCY,

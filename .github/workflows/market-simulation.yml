@@ -38,7 +38,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add market_state.json
+          git add market_state.json incident_state.json
           if git diff --cached --quiet; then
             echo "No market state change to commit."
           else
@@ -49,8 +49,10 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Stage current market state for Pages
-        run: cp market_state.json frontend/market_state.json
+      - name: Stage current market and incident state for Pages
+        run: |
+          cp market_state.json frontend/market_state.json
+          cp incident_state.json frontend/incident_state.json
 
       - name: Upload frontend artifact
         uses: actions/upload-pages-artifact@v3

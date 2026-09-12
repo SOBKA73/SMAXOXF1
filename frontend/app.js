@@ -37,6 +37,7 @@ const pauseMessage = $("#pauseMessage");
 const recoveryForm = $("#recoveryForm");
 const lostWalletInput = $("#lostWalletInput");
 const newWalletInput = $("#newWalletInput");
+const recoveryProposalTime = $("#recoveryProposalTime");
 const recoveryMessage = $("#recoveryMessage");
 const contractStatus = $("#contractStatus");
 const unpauseButton = $("#unpauseButton");
@@ -57,6 +58,7 @@ const yieldValue = $("#yieldValue");
 const yieldMetric = $("#yieldMetric");
 const yieldMetricValue = $("#yieldMetricValue");
 const incidentButton = $("#incidentButton");
+const incidentResolveButton = $("#incidentResolveButton");
 const incidentMessage = $("#incidentMessage");
 const xafAmount = $("#xafAmount");
 const stablecoinAmount = $("#stablecoinAmount");
@@ -170,6 +172,13 @@ async function loadMarketState() {
       fallbackTimer = undefined;
     }
     state.market = state;
+    if (state.incident_active) {
+      incidentActive = true;
+      renderIncidentAlert();
+    } else if (window.localStorage.getItem("smaxof1_incident") === "active") {
+      simulateIncident();
+      return;
+    }
     renderMarketState(state);
   } catch (error) {
     const fallback = createFallbackMarketState();
@@ -268,9 +277,37 @@ function renderYield(value, incident = false) {
   if (yieldMetric) yieldMetric.classList.toggle("metric-highlight", incident);
 }
 
+function renderIncidentAlert() {
+  document.body.classList.add("incident-mode");
+  if (!document.querySelector(".critical-alert")) {
+    const alert = document.createElement("div");
+    alert.className = "critical-alert";
+    alert.setAttribute("role", "alert");
+    alert.textContent = "⚠️ INCIDENT TECHNIQUE : Instabilité réseau détectée au Tchad - Basculement automatique sur la réserve électrique de secours (Fonds OPEX activés)";
+    document.body.appendChild(alert);
+  }
+  if (incidentButton) {
+    incidentButton.disabled = true;
+    incidentButton.textContent = "Incident actif · réserve engagée";
+  }
+  if (incidentResolveButton) incidentResolveButton.disabled = false;
+}
+
+function clearIncidentAlert() {
+  incidentActive = false;
+  document.body.classList.remove("incident-mode");
+  document.querySelector(".critical-alert")?.remove();
+  if (incidentButton) {
+    incidentButton.disabled = false;
+    incidentButton.textContent = "Simuler un incident à N'Djamena";
+  }
+  if (incidentResolveButton) incidentResolveButton.disabled = true;
+}
+
 function simulateIncident() {
   if (incidentActive || !state.market) return;
   incidentActive = true;
+  window.localStorage.setItem("smaxof1_incident", "active");
   const previous = Number(state.market.current_price_xaf || 500);
   const incidentPrice = Number((previous * 0.7).toFixed(2));
   state.market = {
@@ -281,17 +318,20 @@ function simulateIncident() {
     updated_at: new Date().toISOString(),
     history: [...(state.market.history || []), { timestamp: new Date().toISOString(), price_xaf: incidentPrice, change_pct: -30 }].slice(-24),
   };
-  document.body.classList.add("incident-mode");
+  renderIncidentAlert();
   renderMarketState(state.market);
   renderYield(-30, true);
   incidentMessage.textContent = "Incident simulé · réserve électrique de secours activée.";
-  incidentButton.disabled = true;
-  incidentButton.textContent = "Incident actif · réserve engagée";
-  const alert = document.createElement("div");
-  alert.className = "critical-alert";
-  alert.setAttribute("role", "alert");
-  alert.textContent = "⚠️ INCIDENT TECHNIQUE : Instabilité réseau détectée au Tchad - Basculement automatique sur la réserve électrique de secours (Fonds OPEX activés)";
-  document.body.appendChild(alert);
+}
+
+function resolveIncident() {
+  if (!incidentActive || !state.market) return;
+  const recoveryPrice = Number(state.market.previous_price_xaf || 500);
+  window.localStorage.removeItem("smaxof1_incident");
+  clearIncidentAlert();
+  state.market = { ...state.market, current_price_xaf: recoveryPrice, change_pct: 0, updated_at: new Date().toISOString(), history: [...(state.market.history || []), { timestamp: new Date().toISOString(), price_xaf: recoveryPrice, change_pct: 0 }] };
+  renderMarketState(state.market);
+  incidentMessage.textContent = "Incident résolu · batteries de secours opérationnelles, cours restauré à l’index précédent.";
 }
 
 function updateConversion() {
@@ -365,6 +405,7 @@ function scheduleKitInstallation() {
 }
 
 incidentButton?.addEventListener("click", simulateIncident);
+incidentResolveButton?.addEventListener("click", resolveIncident);
 xafAmount?.addEventListener("input", updateConversion);
 stablecoinToggle?.addEventListener("click", () => {
   stablecoin = stablecoin === "USDC" ? "USDT" : "USDC";
@@ -390,6 +431,25 @@ async function loadDeployment() {
   state.deployment = await response.json();
   return state.deployment;
 }
+
+async function createWhitelistSignature(account, approved = true, validitySeconds = 3600) {
+  if (!state.signer || !state.contract || !state.account) throw new Error("Connectez le portefeuille Owner pour signer la whitelist.");
+  const owner = await state.contract.owner();
+  if (owner.toLowerCase() !== state.account.toLowerCase()) throw new Error("La signature EIP-712 doit être produite par l’Owner.");
+  const normalized = ethers.getAddress(normalizeAddressInput(account));
+  const nonce = await state.contract.whitelistNonces(normalized);
+  const deadline = Math.floor(Date.now() / 1000) + validitySeconds;
+  const network = await state.provider.getNetwork();
+  const domain = { name: "SMAXO Starlink Chad", version: "1", chainId: network.chainId, verifyingContract: await state.contract.getAddress() };
+  const types = { Whitelist: [
+    { name: "account", type: "address" }, { name: "approved", type: "bool" },
+    { name: "nonce", type: "uint256" }, { name: "deadline", type: "uint256" },
+  ] };
+  const signature = ethers.Signature.from(await state.signer.signTypedData(domain, types, { account: normalized, approved, nonce, deadline }));
+  return { account: normalized, approved, nonce, deadline, ...signature };
+}
+
+window.createSMAXOWhitelistSignature = createWhitelistSignature;
 
 async function refreshWhitelistRegistry() {
   if (!whitelistRegistry) return;
@@ -652,14 +712,26 @@ recoveryForm.addEventListener("submit", async (event) => {
   submit.innerHTML = '<span class="loader"></span> Récupération on-chain...';
   try {
     const owner = await state.contract.owner();
-    if (owner.toLowerCase() !== state.account.toLowerCase()) throw new Error(`Owner requis : ${shortAddress(owner)}`);
+    const guardian = await state.contract.guardian();
     const paused = await state.contract.paused();
     if (!paused) throw new Error("Le contrat doit être gelé avant une récupération d’urgence.");
-    const tx = await state.contract.emergencyRecoverTokens(lostAddress, newAddress);
+    const proposedAt = Number(recoveryProposalTime?.value || 0);
+    let tx;
+    if (state.account.toLowerCase() === owner.toLowerCase()) {
+      if (proposedAt > 0) {
+        tx = await state.contract.emergencyRecoverTokens(lostAddress, newAddress, proposedAt);
+      } else {
+        tx = await state.contract.proposeEmergencyRecovery(lostAddress, newAddress, await getGasOverrides());
+      }
+    } else if (state.account.toLowerCase() === guardian.toLowerCase()) {
+      if (!proposedAt) throw new Error("Le gardien doit renseigner le timestamp du bloc de proposition.");
+      tx = await state.contract.confirmEmergencyRecovery(lostAddress, newAddress, proposedAt, await getGasOverrides());
+    } else {
+      throw new Error(`Owner ou gardien requis. Gardien actuel : ${shortAddress(guardian)}`);
+    }
     await tx.wait();
-    feedback(recoveryMessage, `Solde transféré vers ${shortAddress(newAddress)}. Transaction : ${shortAddress(tx.hash)}.`);
-    lostWalletInput.value = "";
-    newWalletInput.value = "";
+    feedback(recoveryMessage, state.account.toLowerCase() === owner.toLowerCase() && !proposedAt ? `Proposition créée. Communiquez le timestamp du bloc au gardien. Transaction : ${shortAddress(tx.hash)}.` : state.account.toLowerCase() === guardian.toLowerCase() ? `Double validation enregistrée. L’Owner peut exécuter la récupération. Transaction : ${shortAddress(tx.hash)}.` : `Solde transféré vers ${shortAddress(newAddress)}. Transaction : ${shortAddress(tx.hash)}.`);
+    if (proposedAt) recoveryProposalTime.value = "";
   } catch (error) {
     feedback(recoveryMessage, error.shortMessage || error.reason || error.message || "La récupération a échoué.", true);
   } finally {

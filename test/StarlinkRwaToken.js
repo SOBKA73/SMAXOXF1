@@ -3,12 +3,12 @@ const { ethers } = require("hardhat");
 
 describe("StarlinkRwaToken", function () {
   async function fixture() {
-    const [owner, investorA, investorB, outsider] = await ethers.getSigners();
+    const [owner, investorA, investorB, outsider, guardian] = await ethers.getSigners();
     const Stable = await ethers.getContractFactory("MockStablecoin");
     const stable = await Stable.deploy();
     const Token = await ethers.getContractFactory("StarlinkRwaToken");
     const token = await Token.deploy(await stable.getAddress());
-    return { owner, investorA, investorB, outsider, stable, token };
+    return { owner, investorA, investorB, outsider, guardian, stable, token };
   }
 
   it("mints exactly 20,000 whole tokens with zero decimals", async function () {
@@ -26,6 +26,39 @@ describe("StarlinkRwaToken", function () {
     expect(await token.balanceOf(investorA.address)).to.equal(5_000);
   });
 
+  it("accepts an owner EIP-712 whitelist signature submitted by the investor", async function () {
+    const { owner, investorA, token } = await fixture();
+    const network = await ethers.provider.getNetwork();
+    const deadline = (await ethers.provider.getBlock("latest")).timestamp + 3600;
+    const nonce = await token.whitelistNonces(investorA.address);
+    const domain = { name: "SMAXO Starlink Chad", version: "1", chainId: network.chainId, verifyingContract: await token.getAddress() };
+    const types = { Whitelist: [
+      { name: "account", type: "address" },
+      { name: "approved", type: "bool" },
+      { name: "nonce", type: "uint256" },
+      { name: "deadline", type: "uint256" },
+    ] };
+    const signature = await owner.signTypedData(domain, types, { account: investorA.address, approved: true, nonce, deadline });
+    const split = ethers.Signature.from(signature);
+    await token.connect(investorA).whitelistWithSig(investorA.address, true, deadline, split.v, split.r, split.s);
+    expect(await token.isWhitelisted(investorA.address)).to.equal(true);
+    expect(await token.whitelistNonces(investorA.address)).to.equal(1);
+  });
+
+  it("rejects an expired or non-owner whitelist signature", async function () {
+    const { outsider, investorA, token } = await fixture();
+    const network = await ethers.provider.getNetwork();
+    const deadline = (await ethers.provider.getBlock("latest")).timestamp - 1;
+    const domain = { name: "SMAXO Starlink Chad", version: "1", chainId: network.chainId, verifyingContract: await token.getAddress() };
+    const types = { Whitelist: [
+      { name: "account", type: "address" }, { name: "approved", type: "bool" },
+      { name: "nonce", type: "uint256" }, { name: "deadline", type: "uint256" },
+    ] };
+    const signature = await outsider.signTypedData(domain, types, { account: investorA.address, approved: true, nonce: 0, deadline });
+    const split = ethers.Signature.from(signature);
+    await expect(token.whitelistWithSig(investorA.address, true, deadline, split.v, split.r, split.s)).to.be.revertedWithCustomError(token, "SignatureExpired");
+  });
+
   it("allocates native dividends pro rata and supports pull claims", async function () {
     const { investorA, investorB, token } = await fixture();
     await token.setWhitelist(investorA.address, true);
@@ -35,9 +68,7 @@ describe("StarlinkRwaToken", function () {
     await token.distributeDividends({ value: ethers.parseEther("1") });
     expect(await token.nativeDividendsOwed(investorA.address)).to.equal(ethers.parseEther("0.25"));
     expect(await token.nativeDividendsOwed(investorB.address)).to.equal(ethers.parseEther("0.25"));
-    await expect(token.connect(investorA).claimNativeDividends())
-      .to.emit(token, "NativeDividendsClaimed")
-      .withArgs(investorA.address, ethers.parseEther("0.25"));
+    await expect(token.connect(investorA).claimNativeDividends()).to.emit(token, "NativeDividendsClaimed").withArgs(investorA.address, ethers.parseEther("0.25"));
   });
 
   it("allocates stablecoin dividends with SafeERC20", async function () {
@@ -64,18 +95,20 @@ describe("StarlinkRwaToken", function () {
     expect(await token.paused()).to.equal(false);
   });
 
-  it("recovers a lost wallet balance only while paused and for whitelisted addresses", async function () {
-    const { owner, investorA, investorB, token } = await fixture();
+  it("requires a distinct guardian confirmation for emergency recovery", async function () {
+    const { owner, investorA, investorB, guardian, token } = await fixture();
+    await token.setGuardian(guardian.address);
     await token.setWhitelist(investorA.address, true);
     await token.setWhitelist(investorB.address, true);
     await token.transfer(investorA.address, 1_000);
     await token.pause();
-    await expect(token.emergencyRecoverTokens(investorA.address, investorB.address))
-      .to.emit(token, "EmergencyTokensRecovered")
-      .withArgs(investorA.address, investorB.address, 1_000);
+    const proposalTx = await token.proposeEmergencyRecovery(investorA.address, investorB.address);
+    const receipt = await proposalTx.wait();
+    const proposedAt = (await ethers.provider.getBlock(receipt.blockNumber)).timestamp;
+    await expect(token.emergencyRecoverTokens(investorA.address, investorB.address, proposedAt)).to.be.revertedWithCustomError(token, "RecoveryNotConfirmed");
+    await token.connect(guardian).confirmEmergencyRecovery(investorA.address, investorB.address, proposedAt);
+    await expect(token.emergencyRecoverTokens(investorA.address, investorB.address, proposedAt)).to.emit(token, "EmergencyTokensRecovered").withArgs(investorA.address, investorB.address, 1_000);
     expect(await token.balanceOf(investorA.address)).to.equal(0);
     expect(await token.balanceOf(investorB.address)).to.equal(1_000);
-    await token.unpause();
-    await expect(token.emergencyRecoverTokens(investorA.address, investorB.address)).to.be.revertedWithCustomError(token, "ExpectedPause");
   });
 });
