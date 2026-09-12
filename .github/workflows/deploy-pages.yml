@@ -27,6 +27,11 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Stage ePOS application
+        run: |
+          rm -rf frontend/epos
+          cp -R epos frontend/epos
+
       - name: Upload frontend artifact
         uses: actions/upload-pages-artifact@v3
         with:

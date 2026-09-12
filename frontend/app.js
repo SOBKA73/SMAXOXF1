@@ -9,6 +9,10 @@ const TARGET_CHAIN = {
 };
 
 const state = { provider: null, signer: null, contract: null, account: null, deployment: null };
+const EPOS_CLOUD_KEY = "smaxo_epos_cloud_sales_v1";
+const EPOS_API_ENDPOINT = window.SMAXO_EPOS_API || "";
+let eposRealtimeRevenue = 0;
+let eposCloudBaselineRevenue = 0;
 const $ = (selector) => document.querySelector(selector);
 const connectButton = $("#connectButton");
 const walletNotice = $("#walletNotice");
@@ -222,7 +226,8 @@ function updateFinancialMetrics(price, transparency) {
   const physical = Number(transparency.physical_capital_xaf || 8000000);
   const treasury = Number(transparency.operational_treasury_xaf || 2000000);
   const tokenizedValue = tokenSupply * normalizedPrice;
-  const baseLiquidity = Number(transparency.available_liquidity_xaf || 10710000);
+  const incrementalEposRevenue = Math.max(0, eposRealtimeRevenue - eposCloudBaselineRevenue);
+  const baseLiquidity = Number(transparency.available_liquidity_xaf || 10710000) + incrementalEposRevenue;
   const dynamicProfit = baseLiquidity * ratio;
   const dynamicLiquidity = baseLiquidity * ratio + simulatedLiquidity;
   if (globalCapital) globalCapital.textContent = formatNumber(physical + treasury + tokenizedValue);
@@ -757,3 +762,41 @@ loadMarketState();
 refreshTransferAudit();
 refreshContractStatus();
 refreshWhitelistRegistry();
+
+
+function parseEposRows(data) {
+  const rows = Array.isArray(data) ? data : Array.isArray(data?.record) ? data.record : Array.isArray(data?.sales) ? data.sales : [];
+  return rows.filter((row) => row && Number(row.amount ?? row.amount_xaf) > 0);
+}
+
+async function refreshEposSales() {
+  try {
+    let rows;
+    if (EPOS_API_ENDPOINT) {
+      const response = await fetch(EPOS_API_ENDPOINT, { cache: "no-store" });
+      if (!response.ok) throw new Error("ePOS API indisponible");
+      rows = parseEposRows(await response.json());
+    } else {
+      rows = parseEposRows(JSON.parse(localStorage.getItem(EPOS_CLOUD_KEY) || "[]"));
+    }
+    eposRealtimeRevenue = rows.reduce((sum, row) => sum + Number(row.amount ?? row.amount_xaf), 0);
+    const transparency = window.latestMarketState?.transparency || {};
+    eposCloudBaselineRevenue = Number(transparency.epos_revenue_xaf || 0);
+    if (window.latestMarketState) updateFinancialMetrics(Number(window.latestMarketState.current_price_xaf || 500), transparency);
+  } catch {
+    // Keep the last market snapshot when the optional remote API is unavailable.
+  }
+}
+
+window.addEventListener("storage", (event) => {
+  if (event.key === EPOS_CLOUD_KEY) refreshEposSales();
+});
+try {
+  const eposChannel = new BroadcastChannel("smaxo-epos-cloud");
+  eposChannel.onmessage = refreshEposSales;
+} catch {
+  // BroadcastChannel is optional; storage events still support separate tabs.
+}
+
+refreshEposSales();
+window.setInterval(refreshEposSales, 15000);

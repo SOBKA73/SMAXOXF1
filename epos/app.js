@@ -1,4 +1,8 @@
 const STORAGE_KEY = "smaxo_epos_sales_v1";
+const CLOUD_SALES_KEY = "smaxo_epos_cloud_sales_v1";
+// Set window.SMAXO_EPOS_API before app.js to use a real authenticated REST store.
+// Empty by default: the same-origin async mock keeps the demo functional without exposing API keys.
+const CLOUD_ENDPOINT = window.SMAXO_EPOS_API || "";
 const PRICE_XAF = 500;
 let paymentMethod = "Espèces";
 const $ = (selector) => document.querySelector(selector);
@@ -22,6 +26,32 @@ function readSales() {
 
 function writeSales(sales) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sales));
+}
+
+function readCloudSales() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(CLOUD_SALES_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeCloudSales(sales) {
+  localStorage.setItem(CLOUD_SALES_KEY, JSON.stringify(sales));
+  window.dispatchEvent(new StorageEvent("storage", { key: CLOUD_SALES_KEY, newValue: JSON.stringify(sales) }));
+  try { new BroadcastChannel("smaxo-epos-cloud").postMessage({ type: "sale", at: Date.now() }); } catch { /* optional */ }
+}
+
+async function postSaleToCloud(payload) {
+  if (CLOUD_ENDPOINT) {
+    const response = await fetch(CLOUD_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    if (!response.ok) throw new Error(`API cloud indisponible (${response.status})`);
+  }
+  const cloudSales = readCloudSales();
+  cloudSales.push(payload);
+  writeCloudSales(cloudSales);
+  return payload;
 }
 
 function makeTicketCode() {
@@ -51,18 +81,20 @@ document.querySelectorAll(".mode").forEach((button) => button.addEventListener("
   document.querySelectorAll(".mode").forEach((item) => item.classList.toggle("active", item === button));
 }));
 
-sellButton.addEventListener("click", () => {
+sellButton.addEventListener("click", async () => {
   errorBox.textContent = "";
   sellButton.disabled = true;
   const sale = { ticket_code: makeTicketCode(), issued_at: new Date().toISOString(), amount_xaf: PRICE_XAF, payment_method: paymentMethod, valid_until: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), status: "paid" };
+  const payload = { ticket: sale.ticket_code, method: paymentMethod, amount: PRICE_XAF, timestamp: Date.now() };
   try {
+    await postSaleToCloud(payload);
     const sales = readSales();
     sales.push(sale);
     writeSales(sales);
     showTicket(sale);
     renderHistory();
   } catch {
-    errorBox.textContent = "Impossible d'enregistrer la vente sur cet appareil.";
+    errorBox.textContent = "Vente non synchronisée : vérifiez la connexion puis réessayez.";
   } finally {
     window.setTimeout(() => { sellButton.disabled = false; }, 500);
   }
