@@ -5,7 +5,7 @@
     "code": "2H11000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "utilisé"
   },
   {
     "id": 2,
@@ -13,7 +13,7 @@
     "code": "2H21000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "utilisé"
   },
   {
     "id": 3,
@@ -21,7 +21,7 @@
     "code": "2H31000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 4,
@@ -29,7 +29,7 @@
     "code": "2H41000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 5,
@@ -37,7 +37,7 @@
     "code": "2H51000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "utilisé"
   },
   {
     "id": 6,
@@ -45,7 +45,7 @@
     "code": "2H61000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 7,
@@ -53,7 +53,7 @@
     "code": "2H71000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "utilisé"
   },
   {
     "id": 8,
@@ -61,7 +61,7 @@
     "code": "2H81000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "utilisé"
   },
   {
     "id": 9,
@@ -69,7 +69,7 @@
     "code": "2H91000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 10,
@@ -77,7 +77,7 @@
     "code": "2H101000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 11,
@@ -85,7 +85,7 @@
     "code": "2H111000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "utilisé"
   },
   {
     "id": 12,
@@ -93,7 +93,7 @@
     "code": "2H121000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "utilisé"
   },
   {
     "id": 13,
@@ -101,7 +101,7 @@
     "code": "2H131000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "utilisé"
   },
   {
     "id": 14,
@@ -109,7 +109,7 @@
     "code": "2H141000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "utilisé"
   },
   {
     "id": 15,
@@ -117,7 +117,7 @@
     "code": "2H151000",
     "profile": "2h",
     "uptime": "0s",
-    "status": "available"
+    "status": "utilisé"
   },
   {
     "id": 16,
@@ -125,7 +125,7 @@
     "code": "4H11000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 17,
@@ -133,7 +133,7 @@
     "code": "4H21000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "utilisé"
   },
   {
     "id": 18,
@@ -141,7 +141,7 @@
     "code": "4H31000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "utilisé"
   },
   {
     "id": 19,
@@ -149,7 +149,7 @@
     "code": "4H41000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 20,
@@ -157,7 +157,7 @@
     "code": "4H51000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 21,
@@ -165,7 +165,7 @@
     "code": "4H61000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 22,
@@ -173,7 +173,7 @@
     "code": "4H71000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 23,
@@ -181,7 +181,7 @@
     "code": "4H81000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 24,
@@ -189,7 +189,7 @@
     "code": "4H91000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 25,
@@ -197,7 +197,7 @@
     "code": "4H101000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 26,
@@ -205,7 +205,7 @@
     "code": "4H111000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 27,
@@ -213,7 +213,7 @@
     "code": "4H121000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 28,
@@ -221,7 +221,7 @@
     "code": "4H131000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 29,
@@ -229,7 +229,7 @@
     "code": "4H141000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 30,
@@ -237,7 +237,7 @@
     "code": "4H151000",
     "profile": "4h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 31,
@@ -245,7 +245,7 @@
     "code": "6H11000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 32,
@@ -253,7 +253,7 @@
     "code": "6H21000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 33,
@@ -261,7 +261,7 @@
     "code": "6H31000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 34,
@@ -269,7 +269,7 @@
     "code": "6H41000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 35,
@@ -277,7 +277,7 @@
     "code": "6H51000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 36,
@@ -285,7 +285,7 @@
     "code": "6H61000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 37,
@@ -293,7 +293,7 @@
     "code": "6H71000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 38,
@@ -301,7 +301,7 @@
     "code": "6H81000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 39,
@@ -309,7 +309,7 @@
     "code": "6H91000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 40,
@@ -317,7 +317,7 @@
     "code": "6H101000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 41,
@@ -325,7 +325,7 @@
     "code": "6H111000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 42,
@@ -333,7 +333,7 @@
     "code": "6H121000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 43,
@@ -341,7 +341,7 @@
     "code": "6H131000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 44,
@@ -349,7 +349,7 @@
     "code": "6H141000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 45,
@@ -357,7 +357,7 @@
     "code": "6H151000",
     "profile": "6h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 46,
@@ -365,7 +365,7 @@
     "code": "12H11000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 47,
@@ -373,7 +373,7 @@
     "code": "12H21000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 48,
@@ -381,7 +381,7 @@
     "code": "12H31000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 49,
@@ -389,7 +389,7 @@
     "code": "12H41000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 50,
@@ -397,7 +397,7 @@
     "code": "12H51000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 51,
@@ -405,7 +405,7 @@
     "code": "12H61000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 52,
@@ -413,7 +413,7 @@
     "code": "12H71000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 53,
@@ -421,7 +421,7 @@
     "code": "12H81000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 54,
@@ -429,7 +429,7 @@
     "code": "12H91000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 55,
@@ -437,7 +437,7 @@
     "code": "12H101000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 56,
@@ -445,7 +445,7 @@
     "code": "12H111000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 57,
@@ -453,7 +453,7 @@
     "code": "12H121000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 58,
@@ -461,7 +461,7 @@
     "code": "12H131000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 59,
@@ -469,7 +469,7 @@
     "code": "12H141000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 60,
@@ -477,7 +477,7 @@
     "code": "12H151000",
     "profile": "12h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 61,
@@ -485,7 +485,7 @@
     "code": "24H11000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 62,
@@ -493,7 +493,7 @@
     "code": "24H21000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 63,
@@ -501,7 +501,7 @@
     "code": "24H31000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 64,
@@ -509,7 +509,7 @@
     "code": "24H41000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 65,
@@ -517,7 +517,7 @@
     "code": "24H51000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 66,
@@ -525,7 +525,7 @@
     "code": "24H61000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 67,
@@ -533,7 +533,7 @@
     "code": "24H71000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 68,
@@ -541,7 +541,7 @@
     "code": "24H81000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 69,
@@ -549,7 +549,7 @@
     "code": "24H91000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 70,
@@ -557,7 +557,7 @@
     "code": "24H101000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 71,
@@ -565,7 +565,7 @@
     "code": "24H111000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 72,
@@ -573,7 +573,7 @@
     "code": "24H121000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 73,
@@ -581,7 +581,7 @@
     "code": "24H131000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 74,
@@ -589,7 +589,7 @@
     "code": "24H141000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 75,
@@ -597,7 +597,7 @@
     "code": "24H151000",
     "profile": "24h",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 76,
@@ -605,7 +605,7 @@
     "code": "3J11000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 77,
@@ -613,7 +613,7 @@
     "code": "3J21000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 78,
@@ -621,7 +621,7 @@
     "code": "3J31000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 79,
@@ -629,7 +629,7 @@
     "code": "3J41000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 80,
@@ -637,7 +637,7 @@
     "code": "3J51000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 81,
@@ -645,7 +645,7 @@
     "code": "3J61000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 82,
@@ -653,7 +653,7 @@
     "code": "3J71000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 83,
@@ -661,7 +661,7 @@
     "code": "3J81000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 84,
@@ -669,7 +669,7 @@
     "code": "3J91000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 85,
@@ -677,7 +677,7 @@
     "code": "3J101000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 86,
@@ -685,7 +685,7 @@
     "code": "3J111000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 87,
@@ -693,7 +693,7 @@
     "code": "3J121000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 88,
@@ -701,7 +701,7 @@
     "code": "3J131000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 89,
@@ -709,7 +709,7 @@
     "code": "3J141000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 90,
@@ -717,7 +717,7 @@
     "code": "3J151000",
     "profile": "3j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 91,
@@ -725,7 +725,7 @@
     "code": "7J11000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 92,
@@ -733,7 +733,7 @@
     "code": "7J21000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 93,
@@ -741,7 +741,7 @@
     "code": "7J31000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 94,
@@ -749,7 +749,7 @@
     "code": "7J41000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 95,
@@ -757,7 +757,7 @@
     "code": "7J51000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 96,
@@ -765,7 +765,7 @@
     "code": "7J61000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 97,
@@ -773,7 +773,7 @@
     "code": "7J71000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 98,
@@ -781,7 +781,7 @@
     "code": "7J81000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 99,
@@ -789,7 +789,7 @@
     "code": "7J91000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 100,
@@ -797,7 +797,7 @@
     "code": "7J101000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 101,
@@ -805,7 +805,7 @@
     "code": "7J111000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 102,
@@ -813,7 +813,7 @@
     "code": "7J121000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 103,
@@ -821,7 +821,7 @@
     "code": "7J131000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 104,
@@ -829,7 +829,7 @@
     "code": "7J141000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 105,
@@ -837,7 +837,7 @@
     "code": "7J151000",
     "profile": "7j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 106,
@@ -845,7 +845,7 @@
     "code": "14J11000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 107,
@@ -853,7 +853,7 @@
     "code": "14J21000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 108,
@@ -861,7 +861,7 @@
     "code": "14J31000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 109,
@@ -869,7 +869,7 @@
     "code": "14J41000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 110,
@@ -877,7 +877,7 @@
     "code": "14J51000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 111,
@@ -885,7 +885,7 @@
     "code": "14J61000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 112,
@@ -893,7 +893,7 @@
     "code": "14J71000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 113,
@@ -901,7 +901,7 @@
     "code": "14J81000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 114,
@@ -909,7 +909,7 @@
     "code": "14J91000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 115,
@@ -917,7 +917,7 @@
     "code": "14J101000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 116,
@@ -925,7 +925,7 @@
     "code": "14J111000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 117,
@@ -933,7 +933,7 @@
     "code": "14J121000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 118,
@@ -941,7 +941,7 @@
     "code": "14J131000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 119,
@@ -949,7 +949,7 @@
     "code": "14J141000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 120,
@@ -957,7 +957,7 @@
     "code": "14J151000",
     "profile": "14j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 121,
@@ -965,7 +965,7 @@
     "code": "30J11000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 122,
@@ -973,7 +973,7 @@
     "code": "30J21000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 123,
@@ -981,7 +981,7 @@
     "code": "30J31000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 124,
@@ -989,7 +989,7 @@
     "code": "30J41000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 125,
@@ -997,7 +997,7 @@
     "code": "30J51000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 126,
@@ -1005,7 +1005,7 @@
     "code": "30J61000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 127,
@@ -1013,7 +1013,7 @@
     "code": "30J71000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 128,
@@ -1021,7 +1021,7 @@
     "code": "30J81000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 129,
@@ -1029,7 +1029,7 @@
     "code": "30J91000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 130,
@@ -1037,7 +1037,7 @@
     "code": "30J101000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 131,
@@ -1045,7 +1045,7 @@
     "code": "30J111000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 132,
@@ -1053,7 +1053,7 @@
     "code": "30J121000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 133,
@@ -1061,7 +1061,7 @@
     "code": "30J131000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 134,
@@ -1069,7 +1069,7 @@
     "code": "30J141000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   },
   {
     "id": 135,
@@ -1077,6 +1077,6 @@
     "code": "30J151000",
     "profile": "30j",
     "uptime": "0s",
-    "status": "available"
+    "status": "disponible"
   }
 ]
