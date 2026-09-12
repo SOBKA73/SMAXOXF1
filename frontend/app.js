@@ -222,8 +222,9 @@ function updateFinancialMetrics(price, transparency) {
   const physical = Number(transparency.physical_capital_xaf || 8000000);
   const treasury = Number(transparency.operational_treasury_xaf || 2000000);
   const tokenizedValue = tokenSupply * normalizedPrice;
-  const dynamicProfit = 10710000 * ratio;
-  const dynamicLiquidity = 10710000 * ratio + simulatedLiquidity;
+  const baseLiquidity = Number(transparency.available_liquidity_xaf || 10710000);
+  const dynamicProfit = baseLiquidity * ratio;
+  const dynamicLiquidity = baseLiquidity * ratio + simulatedLiquidity;
   if (globalCapital) globalCapital.textContent = formatNumber(physical + treasury + tokenizedValue);
   if (tokenizedOffer) tokenizedOffer.textContent = formatNumber(tokenizedValue);
   if (netProfit) netProfit.textContent = formatNumber(dynamicProfit);

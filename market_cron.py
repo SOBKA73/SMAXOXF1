@@ -13,6 +13,7 @@ from pathlib import Path
 
 STATE_PATH = Path(__file__).with_name("market_state.json")
 INCIDENT_PATH = Path(__file__).with_name("incident_state.json")
+SALES_PATH = Path(__file__).with_name("epos") / "sales_history.json"
 INITIAL_PRICE_XAF = 500.0
 MIN_CHANGE_PCT = -1.2
 MAX_CHANGE_PCT = 1.8
@@ -53,6 +54,25 @@ def incident_is_active() -> bool:
         return False
 
 
+def load_sales_summary() -> dict:
+    """Read the versioned ePOS ledger; malformed rows are ignored defensively."""
+    try:
+        rows = json.loads(SALES_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        rows = []
+    if not isinstance(rows, list):
+        rows = []
+    valid = []
+    for row in rows:
+        try:
+            if isinstance(row, dict) and row.get("status", "paid") == "paid" and float(row.get("amount_xaf", 0)) > 0:
+                valid.append(row)
+        except (TypeError, ValueError):
+            continue
+    revenue = round(sum(float(row.get("amount_xaf", 0)) for row in valid), 2)
+    return {"sales_count": len(valid), "revenue_xaf": revenue}
+
+
 def next_change_pct() -> float:
     # Normal distribution centred on a modest positive drift, clipped to the
     # requested realistic hourly range.
@@ -76,6 +96,11 @@ def update_state(state: dict) -> dict:
         change_pct = next_change_pct()
         current = round(previous * (1.0 + change_pct / 100.0), 2)
     timestamp = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    sales = load_sales_summary()
+    transparency = dict(TRANSPARENCY)
+    transparency["epos_revenue_xaf"] = sales["revenue_xaf"]
+    transparency["epos_sales_count"] = sales["sales_count"]
+    transparency["available_liquidity_xaf"] = round(TRANSPARENCY["available_liquidity_xaf"] + sales["revenue_xaf"], 2)
     history = list(state.get("history", []))
     history.append({"timestamp": timestamp, "price_xaf": current, "change_pct": change_pct})
     state.update(
@@ -88,7 +113,7 @@ def update_state(state: dict) -> dict:
             "incident_active": active,
             "updated_at": timestamp,
             "history": history[-MAX_HISTORY_POINTS:],
-            "transparency": TRANSPARENCY,
+            "transparency": transparency,
         }
     )
     return state
