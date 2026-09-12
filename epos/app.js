@@ -1,103 +1,40 @@
 const STORAGE_KEY = "smaxo_epos_sales_v1";
+const SOLD_KEY = "smaxo_epos_sold_tickets_v1";
 const CLOUD_SALES_KEY = "smaxo_epos_cloud_sales_v1";
-// Set window.SMAXO_EPOS_API before app.js to use a real authenticated REST store.
-// Empty by default: the same-origin async mock keeps the demo functional without exposing API keys.
 const CLOUD_ENDPOINT = window.SMAXO_EPOS_API || "";
-const PRICE_XAF = 500;
 let paymentMethod = "Espèces";
+let selectedPlan = null;
+let tariffs = [];
+let ticketPool = [];
 const $ = (selector) => document.querySelector(selector);
-const sellButton = $("#sellButton");
-const ticket = $("#ticket");
-const errorBox = $("#error");
-const historyList = $("#historyList");
-const saleCount = $("#saleCount");
-const ticketCode = $("#ticketCode");
-const ticketTime = $("#ticketTime");
-const ticketPayment = $("#ticketPayment");
+const plansBox = $("#plans"); const sellButton = $("#sellButton"); const ticket = $("#ticket"); const errorBox = $("#error"); const historyList = $("#historyList"); const saleCount = $("#saleCount");
 
-function readSales() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeSales(sales) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sales));
-}
-
-function readCloudSales() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(CLOUD_SALES_KEY) || "[]");
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeCloudSales(sales) {
-  localStorage.setItem(CLOUD_SALES_KEY, JSON.stringify(sales));
-  window.dispatchEvent(new StorageEvent("storage", { key: CLOUD_SALES_KEY, newValue: JSON.stringify(sales) }));
-  try { new BroadcastChannel("smaxo-epos-cloud").postMessage({ type: "sale", at: Date.now() }); } catch { /* optional */ }
-}
+function readJson(key) { try { const value = JSON.parse(localStorage.getItem(key) || "[]"); return Array.isArray(value) ? value : []; } catch { return []; } }
+function writeJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+function readSales() { return readJson(STORAGE_KEY); }
+function readSold() { return new Set(readJson(SOLD_KEY)); }
+function readCloudSales() { return readJson(CLOUD_SALES_KEY); }
+function makePayload(sale) { return { ticket: sale.ticket, method: sale.method, amount: sale.amount, timestamp: Date.now() }; }
 
 async function postSaleToCloud(payload) {
   if (CLOUD_ENDPOINT) {
     const response = await fetch(CLOUD_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-    if (!response.ok) throw new Error(`API cloud indisponible (${response.status})`);
+    if (!response.ok) throw new Error(`API trésorerie indisponible (${response.status})`);
   }
-  const cloudSales = readCloudSales();
-  cloudSales.push(payload);
-  writeCloudSales(cloudSales);
-  return payload;
+  const cloudSales = readCloudSales(); cloudSales.push(payload); writeJson(CLOUD_SALES_KEY, cloudSales);
+  try { new BroadcastChannel("smaxo-epos-cloud").postMessage({ type: "sale", payload }); } catch { /* optional */ }
 }
 
-function makeTicketCode() {
-  const random = Math.floor(1000 + Math.random() * 9000);
-  return `SMAXO-${random}`;
+function availableTicket(profile) { const sold = readSold(); return ticketPool.find((item) => item.profile === profile && item.status === "available" && !sold.has(item.code)); }
+function renderPlans() {
+  plansBox.innerHTML = tariffs.map((plan) => `<button class="plan" type="button" data-profile="${plan.profile}"><span>${plan.label}</span><strong>${plan.price_xaf.toLocaleString("fr-FR")} XAF</strong><small>${ticketPool.filter((item) => item.profile === plan.profile && item.status === "available" && !readSold().has(item.code)).length} tickets disponibles</small></button>`).join("");
+  plansBox.querySelectorAll(".plan").forEach((button) => button.addEventListener("click", () => { selectedPlan = tariffs.find((plan) => plan.profile === button.dataset.profile); plansBox.querySelectorAll(".plan").forEach((item) => item.classList.toggle("active", item === button)); sellButton.disabled = false; sellButton.textContent = `Vendre ${selectedPlan.label} — ${selectedPlan.price_xaf.toLocaleString("fr-FR")} XAF`; }));
 }
+function renderHistory() { const sales = readSales(); saleCount.textContent = `${sales.length} ticket${sales.length === 1 ? "" : "s"}`; historyList.innerHTML = sales.length ? sales.slice().reverse().slice(0, 10).map((sale) => `<div class="sale"><div><strong>${sale.ticket}</strong><small>${new Date(sale.issued_at).toLocaleString("fr-FR")} · ${sale.profile} · ${sale.method}</small></div><strong>${sale.amount.toLocaleString("fr-FR")} XAF</strong></div>`).join("") : '<div class="empty">Aucune vente enregistrée sur cet appareil.</div>'; }
+function showTicket(sale) { $("#ticketCode").textContent = sale.ticket; $("#ticketTime").textContent = new Date(sale.issued_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }); $("#ticketPlan").textContent = sale.label; $("#ticketPayment").textContent = sale.method; $("#ticketAmount").textContent = `${sale.amount.toLocaleString("fr-FR")} XAF`; ticket.classList.remove("hidden"); }
 
-function renderHistory() {
-  const sales = readSales();
-  saleCount.textContent = `${sales.length} ticket${sales.length === 1 ? "" : "s"}`;
-  if (!sales.length) {
-    historyList.innerHTML = '<div class="empty">Aucune vente enregistrée sur cet appareil.</div>';
-    return;
-  }
-  historyList.innerHTML = sales.slice().reverse().slice(0, 8).map((sale) => `<div class="sale"><div><strong>${sale.ticket_code}</strong><small>${new Date(sale.issued_at).toLocaleString("fr-FR")} · ${sale.payment_method}</small></div><strong>${sale.amount_xaf.toLocaleString("fr-FR")} XAF</strong></div>`).join("");
-}
+document.querySelectorAll(".mode").forEach((button) => button.addEventListener("click", () => { paymentMethod = button.dataset.payment; document.querySelectorAll(".mode").forEach((item) => item.classList.toggle("active", item === button)); }));
+sellButton.addEventListener("click", async () => { errorBox.textContent = ""; if (!selectedPlan) return; const item = availableTicket(selectedPlan.profile); if (!item) { errorBox.textContent = `Stock épuisé pour le forfait ${selectedPlan.label}.`; renderPlans(); return; } sellButton.disabled = true; try { const sale = { ticket: item.code, profile: item.profile, label: selectedPlan.label, method: paymentMethod, amount: selectedPlan.price_xaf, issued_at: new Date().toISOString(), status: "paid" }; await postSaleToCloud(makePayload(sale)); const sold = readSold(); sold.add(item.code); writeJson(SOLD_KEY, [...sold]); writeJson(STORAGE_KEY, [...readSales(), sale]); showTicket(sale); renderHistory(); renderPlans(); } catch (error) { errorBox.textContent = error.message || "Vente non synchronisée : réessayez."; } finally { sellButton.disabled = !selectedPlan; } });
 
-function showTicket(sale) {
-  ticketCode.textContent = sale.ticket_code;
-  ticketTime.textContent = new Date(sale.issued_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
-  ticketPayment.textContent = sale.payment_method;
-  ticket.classList.remove("hidden");
-}
-
-document.querySelectorAll(".mode").forEach((button) => button.addEventListener("click", () => {
-  paymentMethod = button.dataset.payment;
-  document.querySelectorAll(".mode").forEach((item) => item.classList.toggle("active", item === button));
-}));
-
-sellButton.addEventListener("click", async () => {
-  errorBox.textContent = "";
-  sellButton.disabled = true;
-  const sale = { ticket_code: makeTicketCode(), issued_at: new Date().toISOString(), amount_xaf: PRICE_XAF, payment_method: paymentMethod, valid_until: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), status: "paid" };
-  const payload = { ticket: sale.ticket_code, method: paymentMethod, amount: PRICE_XAF, timestamp: Date.now() };
-  try {
-    await postSaleToCloud(payload);
-    const sales = readSales();
-    sales.push(sale);
-    writeSales(sales);
-    showTicket(sale);
-    renderHistory();
-  } catch {
-    errorBox.textContent = "Vente non synchronisée : vérifiez la connexion puis réessayez.";
-  } finally {
-    window.setTimeout(() => { sellButton.disabled = false; }, 500);
-  }
-});
-
+Promise.all([fetch("tarifs.json", { cache: "no-store" }).then((response) => response.json()), fetch("tickets_pool.json", { cache: "no-store" }).then((response) => response.json())]).then(([plans, pool]) => { tariffs = plans; ticketPool = pool; renderPlans(); }).catch(() => { errorBox.textContent = "Catalogue indisponible : aucune vente ne peut être émise."; });
 renderHistory();

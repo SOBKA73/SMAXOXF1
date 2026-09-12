@@ -1,16 +1,16 @@
-# SMAXO ePOS
+# SMAXO ePOS industriel
 
-L’ePOS émet des tickets de 500 XAF et construit le payload REST suivant :
+L’ePOS charge `tarifs.json` et `tickets_pool.json`, affiche les neuf forfaits officiels et distribue le premier ticket disponible correspondant au profil choisi. Le navigateur conserve les codes distribués dans `localStorage` sous `smaxo_epos_sold_tickets_v1` afin d’éviter un doublon sur l’appareil.
+
+Le payload financier envoyé au store REST est :
 
 ```json
 {
-  "ticket": "SMAXO-1234",
+  "ticket": "2H11000",
   "method": "Espèces",
-  "amount": 500,
+  "amount": 100,
   "timestamp": 1789210000000
 }
 ```
 
-Pour brancher un store REST réel, définir `window.SMAXO_EPOS_API` avant le chargement de `app.js`. Le endpoint doit accepter `POST` pour une vente et `GET` pour retourner un tableau de ventes, ou un objet contenant `record` ou `sales`.
-
-Sans endpoint configuré, l’application utilise un store asynchrone same-origin basé sur `localStorage` et `BroadcastChannel`. Il synchronise immédiatement les onglets ePOS et Dashboard du même navigateur, sans exposer de clé API. Ce mode ne constitue pas une base cloud multi-appareils ; une API authentifiée est nécessaire pour une synchronisation inter-kiosques.
+Pour brancher un endpoint cloud authentifié, définir `window.SMAXO_EPOS_API` avant le chargement de `app.js`. L’endpoint doit accepter `POST` pour une vente. Sans endpoint configuré, le fallback `localStorage` et `BroadcastChannel` synchronise immédiatement les onglets ePOS et Dashboard du même navigateur ; il ne constitue pas un registre transactionnel multi-appareils.

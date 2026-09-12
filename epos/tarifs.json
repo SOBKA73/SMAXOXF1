@@ -1,0 +1,56 @@
+[
+  {
+    "profile": "2h",
+    "label": "2 Heures",
+    "price_xaf": 100,
+    "prefix": "2H"
+  },
+  {
+    "profile": "4h",
+    "label": "4 Heures",
+    "price_xaf": 150,
+    "prefix": "4H"
+  },
+  {
+    "profile": "6h",
+    "label": "6 Heures",
+    "price_xaf": 200,
+    "prefix": "6H"
+  },
+  {
+    "profile": "12h",
+    "label": "12 Heures",
+    "price_xaf": 300,
+    "prefix": "12H"
+  },
+  {
+    "profile": "24h",
+    "label": "24 Heures",
+    "price_xaf": 500,
+    "prefix": "24H"
+  },
+  {
+    "profile": "3j",
+    "label": "3 Jours",
+    "price_xaf": 850,
+    "prefix": "3J"
+  },
+  {
+    "profile": "7j",
+    "label": "7 Jours",
+    "price_xaf": 1350,
+    "prefix": "7J"
+  },
+  {
+    "profile": "14j",
+    "label": "14 Jours",
+    "price_xaf": 2250,
+    "prefix": "14J"
+  },
+  {
+    "profile": "30j",
+    "label": "30 Jours",
+    "price_xaf": 4200,
+    "prefix": "30J"
+  }
+]
