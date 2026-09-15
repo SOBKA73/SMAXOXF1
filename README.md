@@ -12,6 +12,10 @@ Le site GitHub Pages est accessible ici :
 
 **[https://sobka73.github.io/SMAXOXF1/](https://sobka73.github.io/SMAXOXF1/)**
 
+L’application commerçant ePOS, avec les forfaits Wi-Fi et le catalogue de tickets MikroTik, est accessible ici :
+
+**[https://sobka73.github.io/SMAXOXF1/epos/](https://sobka73.github.io/SMAXOXF1/epos/)**
+
 Pour utiliser les fonctions on-chain, il faut installer MetaMask, sélectionner **Arbitrum Sepolia**, disposer d’un peu d’ETH de test pour le gas et utiliser le portefeuille Owner lorsque l’action demande un privilège administrateur. Le dernier déploiement Pages réussi est consultable dans [GitHub Actions](https://github.com/SOBKA73/SMAXOXF1/actions/workflows/deploy-pages.yml).
 
 ## Contrat actuellement déployé
