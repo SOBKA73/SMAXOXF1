@@ -29,6 +29,9 @@ jobs:
 
       - name: Stage ePOS application
         run: |
+          cp market_state.json frontend/market_state.json
+          cp incident_state.json frontend/incident_state.json
+          cp mahrasoft_model_summary.json frontend/mahrasoft_model_summary.json
           rm -rf frontend/epos
           cp -R epos frontend/epos
 

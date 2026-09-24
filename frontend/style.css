@@ -140,3 +140,24 @@ h1 { font-size: clamp(48px, 6.2vw, 82px); line-height: 1.02; margin: 22px 0; }
 .documentation-links a { color: #aaa5c9; font-size: 11px; transition: color .2s; }.documentation-links a:hover { color: var(--green); }
 @media (max-width: 460px) { .transfer-audit { grid-template-columns: 1fr; } }
 @media (max-width: 800px) { .documentation { align-items: start; flex-direction: column; gap: 16px; }.documentation-links { justify-content: flex-start; } }
+
+/* Mahrasoft consolidated model */
+.segment-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.segment-card { min-height:190px; padding:22px; display:flex; flex-direction:column; justify-content:space-between; }
+.segment-card h3 { font-size:18px; margin:10px 0 6px; }
+.segment-card .segment-driver { color:var(--muted); font-size:11px; line-height:1.45; }
+.segment-card .segment-revenue { font-family:"Space Grotesk"; font-size:28px; letter-spacing:-.06em; }
+.segment-card .segment-growth { color:var(--green); font-size:11px; font-weight:700; }
+.yield-grid { display:grid; grid-template-columns:1.35fr .65fr; gap:14px; margin-top:14px; }
+.yield-panel, .model-audit-panel { padding:24px; min-height:230px; }
+.yield-panel h3, .model-audit-panel h3 { font-size:17px; margin-top:8px; }
+.yield-schedule { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:22px; }
+.yield-year { background:rgba(255,255,255,.035); border:1px solid var(--border); border-radius:11px; padding:14px; }
+.yield-year strong { display:block; font-family:"Space Grotesk"; font-size:24px; margin:7px 0; }
+.yield-year span { color:var(--muted); font-size:11px; }
+.model-audit-panel p { color:var(--muted); font-size:12px; line-height:1.5; margin:18px 0 12px; }
+.audit-checks { display:flex; flex-direction:column; gap:7px; }
+.audit-check { color:var(--green); font-size:11px; }
+.audit-check.fail { color:#ff9aaf; }
+@media (max-width: 800px) { .segment-grid { grid-template-columns:repeat(2,1fr); }.yield-grid { grid-template-columns:1fr; } }
+@media (max-width: 460px) { .segment-grid { grid-template-columns:1fr 1fr; gap:9px; }.segment-card { padding:15px; min-height:175px; }.segment-card h3 { font-size:14px; }.segment-card .segment-revenue { font-size:21px; }.yield-schedule { grid-template-columns:1fr; } }

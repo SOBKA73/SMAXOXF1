@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#090b16" />
-    <meta name="description" content="SMAXO Starlink Chad — dashboard RWA Web3." />
-    <title>SMAXO Starlink Chad | RWA Dashboard</title>
+    <meta name="description" content="Mahrasoft Innovations — dashboard RWA Web3 consolidé." />
+    <title>Mahrasoft Innovations | RWA Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -18,7 +18,7 @@
     <header class="site-header container">
       <a class="brand" href="#top" aria-label="SMAXO accueil">
         <span class="brand-mark">S</span>
-        <span>SMAXO<span class="brand-muted">/RWA</span></span>
+        <span>MAHRASOFT<span class="brand-muted">/RWA</span></span>
       </a>
       <nav class="nav-links" aria-label="Navigation principale">
         <a href="#performance">Performance</a>
@@ -34,14 +34,14 @@
     <main id="top" class="container">
       <section class="hero section-grid">
         <div class="hero-copy">
-          <div class="eyebrow"><span class="status-dot"></span> RWA • N'DJAMENA • ARBITRUM</div>
-          <h1>Le rendement réel,<br /><span class="gradient-text">en mouvement.</span></h1>
-          <p class="hero-text">Une infrastructure transparente pour participer à l'économie numérique du Tchad, kit après kit et hotspot après hotspot.</p>
+          <div class="eyebrow"><span class="status-dot"></span> MAHRASOFT • RWA • ARBITRUM SEPOLIA</div>
+          <h1>Une économie numérique,<br /><span class="gradient-text">segment par segment.</span></h1>
+          <p class="hero-text">Un modèle consolidé pour les activités GovTech, EdTech, marketplace et Pharma/Health Tech de Mahrasoft Innovations.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#performance">Explorer la performance <span>↗</span></a>
             <a class="button button-ghost" href="#investor">Voir mon espace</a>
           </div>
-          <div class="trust-row"><span>● Contrat permissionné</span><span>● KYC on-chain</span><span>● 20 000 parts</span></div>
+          <div class="trust-row"><span>● Smart-Ticket</span><span>● KYC on-chain</span><span>● 20 % tokenisé</span></div>
         </div>
         <div class="hero-visual card glass-card" aria-label="Aperçu de performance">
           <div class="visual-top"><span class="mini-label">YIELD NET RÉEL</span><span id="yieldChip" class="chip chip-green">+107.10%</span></div>
@@ -52,17 +52,26 @@
       </section>
 
       <section id="performance" class="section-block">
-        <div class="section-heading"><div><div class="eyebrow">01 / PERFORMANCE RWA TCHAD</div><h2>Une vision claire de l'actif.</h2></div><span class="section-index">BASE 12 MOIS</span></div>
+        <div class="section-heading"><div><div class="eyebrow">01 / PERFORMANCE MAHRASOFT</div><h2>Une vision consolidée de l'actif.</h2></div><span class="section-index" id="modelAsOf">3 ANS · XAF</span></div>
         <div class="metric-grid">
-          <article class="metric-card card"><span class="metric-label">Capital global</span><strong id="globalCapital">20 000 000</strong><span class="metric-unit">XAF · valorisation cloud</span></article>
-          <article class="metric-card card"><span class="metric-label">Offre tokenisée</span><strong id="tokenizedOffer">20 000</strong><span class="metric-unit">SMAXOF1 · prix cloud actuel</span></article>
-          <article class="metric-card card metric-highlight"><span class="metric-label">Bénéfice net</span><strong id="netProfit">10 710 000</strong><span class="metric-unit">XAF · prorata valorisation</span></article>
-          <article id="yieldMetric" class="metric-card card"><span class="metric-label">Yield net</span><strong id="yieldMetricValue">107,10<span class="small-percent">%</span></strong><span class="metric-unit">sur le capital tokenisé</span></article>
+          <article class="metric-card card"><span class="metric-label">Valorisation globale</span><strong id="globalCapital">327 957 000</strong><span class="metric-unit">XAF · 500 000 EUR</span></article>
+          <article class="metric-card card"><span class="metric-label">Offre tokenisée</span><strong id="tokenizedOffer">65 591 400</strong><span class="metric-unit">XAF · allocation cible 20 %</span></article>
+          <article class="metric-card card metric-highlight"><span class="metric-label">Bénéfice net A1</span><strong id="netProfit">95 822 043</strong><span class="metric-unit">XAF · modèle consolidé</span></article>
+          <article id="yieldMetric" class="metric-card card"><span class="metric-label">ROI Smart-Ticket A1</span><strong id="yieldMetricValue">58,44<span class="small-percent">%</span></strong><span class="metric-unit">dividendes à 40 %</span></article>
+        </div>
+      </section>
+
+      <section id="mahrasoftModel" class="section-block">
+        <div class="section-heading"><div><div class="eyebrow">02 / BUSINESS UNITS CONSOLIDÉS</div><h2>Quatre moteurs de revenus.</h2></div><span class="section-index" id="modelStatus">CHARGEMENT CLOUD...</span></div>
+        <div id="segmentCards" class="segment-grid"></div>
+        <div class="yield-grid">
+          <article class="card yield-panel"><div class="card-top"><div><span class="metric-label">Calendrier de rendement</span><h3>Dividendes de l'offre RWA</h3></div><span class="chip chip-green">40 % payout</span></div><div id="yieldSchedule" class="yield-schedule"></div></article>
+          <article class="card model-audit-panel"><span class="metric-label">Contrôle de cohérence</span><h3>Valuation audit</h3><p id="modelAuditMessage">Lecture des contrôles du modèle Mahrasoft...</p><div id="modelAuditChecks" class="audit-checks"></div></article>
         </div>
       </section>
 
       <section id="market" class="section-block">
-        <div class="section-heading"><div><div class="eyebrow">MARCHÉ CLOUD · SMAXOF1</div><h2>Le prix, heure après heure.</h2></div><span class="section-index" id="marketUpdatedAt">SYNCHRONISATION...</span></div>
+        <div class="section-heading"><div><div class="eyebrow">MARCHÉ CLOUD · SMART-TICKET</div><h2>L'indice, heure après heure.</h2></div><span class="section-index" id="marketUpdatedAt">SYNCHRONISATION...</span></div>
         <div class="market-grid">
           <article class="card market-card"><div class="card-top"><div><span class="metric-label">Prix indicatif</span><h3 id="marketPrice">500,00 XAF</h3></div><span id="marketChange" class="chip chip-green">+0,00%</span></div><p id="marketStatus">Index cloud transparent, sans valeur de marché garantie.</p><canvas id="marketChart" aria-label="Historique indicatif du prix SMAXOF1"></canvas></article>
           <div class="metric-grid transparency-grid">
@@ -153,7 +162,7 @@
     </main>
 
     <section id="documentation" class="documentation container"><div><div class="eyebrow">TRANSPARENCE · PREUVES</div><h2>Documentation &amp; Preuves</h2></div><div class="documentation-links"><a href="https://sepolia.arbiscan.io/address/0xe52f7A50D7d000D011dE760CBdeB57363A029406" target="_blank" rel="noopener">Contrat officiel Arbitrum Sepolia ↗</a><a href="https://github.com/SOBKA73/SMAXOXF1/blob/main/SECURITY_AUDIT_REPORT.md" target="_blank" rel="noopener">Registre d’audit Slither ↗</a><a href="https://github.com/SOBKA73/SMAXOXF1/actions" target="_blank" rel="noopener">Statut des workflows cloud ↗</a></div></section>
-    <footer class="site-footer container"><span>© 2026 SMAXO Starlink Chad</span><span>Index cloud · Données transparentes simulées</span><span>Arbitrum-ready <span class="footer-dot"></span></span></footer>
+    <footer class="site-footer container"><span>© 2026 Mahrasoft Innovations</span><span>Modèle consolidé · Données cloud simulées</span><span>Arbitrum-ready <span class="footer-dot"></span></span></footer>
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="app.js"></script>

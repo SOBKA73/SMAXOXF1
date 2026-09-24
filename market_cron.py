@@ -11,9 +11,14 @@ import random
 from datetime import datetime, timezone
 from pathlib import Path
 
+from mahrasoft_token_model import audit_checks, build_pnl, build_token_yield, validate_config
+
 STATE_PATH = Path(__file__).with_name("market_state.json")
 INCIDENT_PATH = Path(__file__).with_name("incident_state.json")
 SALES_PATH = Path(__file__).with_name("epos") / "sales_history.json"
+MAHRASOFT_SUMMARY_PATH = Path(__file__).with_name("mahrasoft_model_summary.json")
+MAHRASOFT_PNL_PATH = Path(__file__).with_name("mahrasoft_consolidated_pnl.csv")
+MAHRASOFT_YIELD_PATH = Path(__file__).with_name("mahrasoft_token_yield.csv")
 INITIAL_PRICE_XAF = 500.0
 MIN_CHANGE_PCT = -1.2
 MAX_CHANGE_PCT = 1.8
@@ -119,8 +124,39 @@ def update_state(state: dict) -> dict:
     return state
 
 
+def update_mahrasoft_model() -> dict:
+    """Rebuild the consolidated Mahrasoft outputs on every cloud tick."""
+    validate_config()
+    pnl = build_pnl()
+    yield_schedule = build_token_yield(pnl)
+    checks = audit_checks(pnl, yield_schedule)
+    pnl.to_csv(MAHRASOFT_PNL_PATH, index=False)
+    yield_schedule.to_csv(MAHRASOFT_YIELD_PATH, index=False)
+    summary = {
+        "company": "Mahrasoft Innovations",
+        "valuation_xaf": 327_957_000,
+        "tokenized_offering_xaf": 65_591_400,
+        "updated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "pnl": pnl.to_dict(orient="records"),
+        "token_yield": yield_schedule.to_dict(orient="records"),
+        "audit_checks": checks,
+    }
+    MAHRASOFT_SUMMARY_PATH.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return summary
+
+
 def main() -> None:
     state = update_state(load_state())
+    model = update_mahrasoft_model()
+    state["mahrasoft"] = {
+        "company": model["company"],
+        "valuation_xaf": model["valuation_xaf"],
+        "tokenized_offering_xaf": model["tokenized_offering_xaf"],
+        "year_1_net_profit_xaf": model["pnl"][0]["net profit XAF"],
+        "year_1_roi_pct": model["token_yield"][0]["annualized ROI %"],
+        "audit_pass": model["audit_checks"]["all_checks_pass"],
+        "updated_at": model["updated_at"],
+    }
     STATE_PATH.write_text(json.dumps(state, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(
         f"{state['asset']} | {state['previous_price_xaf']:.2f} -> "

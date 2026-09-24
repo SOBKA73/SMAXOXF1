@@ -61,6 +61,12 @@ const yieldChip = $("#yieldChip");
 const yieldValue = $("#yieldValue");
 const yieldMetric = $("#yieldMetric");
 const yieldMetricValue = $("#yieldMetricValue");
+const segmentCards = $("#segmentCards");
+const yieldSchedule = $("#yieldSchedule");
+const modelAuditMessage = $("#modelAuditMessage");
+const modelAuditChecks = $("#modelAuditChecks");
+const modelStatus = $("#modelStatus");
+const modelAsOf = $("#modelAsOf");
 const incidentButton = $("#incidentButton");
 const incidentResolveButton = $("#incidentResolveButton");
 const incidentMessage = $("#incidentMessage");
@@ -92,6 +98,64 @@ const shortAddress = (address) => `${address.slice(0, 6)}...${address.slice(-4)}
 function feedback(target, text, error = false) {
   target.textContent = text;
   target.classList.toggle("error", error);
+}
+
+const segmentMeta = {
+  "GovTech & Infrastructure": { short: "GovTech", color: "#d666ff" },
+  EdTech: { short: "EdTech", color: "#74e8f3" },
+  "E-Commerce": { short: "Mahrasouk", color: "#7cf0bf" },
+  "Pharma & Health Tech": { short: "Mahrapharma", color: "#ffcf70" },
+};
+
+function formatPercent(value) {
+  return `${Number(value).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+}
+
+function renderMahrasoftModel(summary) {
+  const pnl = summary.pnl || [];
+  const yieldRows = summary.token_yield || [];
+  const firstYear = pnl[0] || {};
+  const firstYield = yieldRows[0] || {};
+  const valuation = Number(summary.valuation_xaf || 327957000);
+  const offering = Number(summary.tokenized_offering_xaf || 65591400);
+  if (globalCapital) globalCapital.textContent = formatNumber(valuation);
+  if (tokenizedOffer) tokenizedOffer.textContent = formatNumber(offering);
+  if (netProfit) netProfit.textContent = formatNumber(Number(firstYear["net profit XAF"] || 0));
+  renderYield(Number(firstYield["annualized ROI %"] || 0));
+  if (modelStatus) modelStatus.textContent = `${pnl.length} EXERCICES · CLOUD SYNC`;
+  if (modelAsOf) modelAsOf.textContent = `${pnl.length} ANS · XAF`;
+
+  if (segmentCards) {
+    const segmentEntries = Object.entries(firstYear).filter(([key]) => key.endsWith(" revenue XAF"));
+    segmentCards.innerHTML = segmentEntries.map(([key, value]) => {
+      const segment = key.replace(" revenue XAF", "");
+      const meta = segmentMeta[segment] || { short: segment, color: "#a98aff" };
+      const growth = segment === "GovTech & Infrastructure" ? "+15 % / an" : "Base constante";
+      return `<article class="card segment-card" style="border-top:2px solid ${meta.color}"><div><span class="metric-label">${meta.short}</span><h3>${segment}</h3><p class="segment-driver">${formatNumber(value)} XAF de revenus annuels</p></div><div><strong class="segment-revenue">${formatNumber(value)}</strong><span class="segment-growth">${growth}</span></div></article>`;
+    }).join("");
+  }
+
+  if (yieldSchedule) {
+    yieldSchedule.innerHTML = yieldRows.map((row) => `<div class="yield-year"><span>ANNÉE ${row.year}</span><strong>${formatPercent(row["annualized ROI %"])}</strong><span>${formatNumber(row["dividends allocated to token holders XAF"])} XAF distribuables</span><span>${Number(row["dividend per Smart-Ticket XAF"]).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} XAF / ticket</span></div>`).join("");
+  }
+
+  const checks = summary.audit_checks || {};
+  const checkEntries = Object.entries(checks).filter(([key]) => key !== "all_checks_pass");
+  if (modelAuditMessage) modelAuditMessage.textContent = checks.all_checks_pass ? "✓ Valorisation, allocation et waterfall de dividendes cohérents." : "⚠ Certains contrôles nécessitent une revue.";
+  if (modelAuditChecks) modelAuditChecks.innerHTML = checkEntries.map(([key, passed]) => `<span class="audit-check ${passed ? "" : "fail"}">${passed ? "✓" : "!"} ${key.replaceAll("_", " ")}</span>`).join("");
+}
+
+async function loadMahrasoftModel() {
+  try {
+    const response = await fetch(`mahrasoft_model_summary.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error("Synthèse Mahrasoft indisponible");
+    const summary = await response.json();
+    state.mahrasoft = summary;
+    renderMahrasoftModel(summary);
+  } catch {
+    if (modelStatus) modelStatus.textContent = "MODÈLE LOCAL EN ATTENTE";
+    if (modelAuditMessage) modelAuditMessage.textContent = "La dernière synthèse cloud est momentanément indisponible.";
+  }
 }
 
 function normalizeAddressInput(value) {

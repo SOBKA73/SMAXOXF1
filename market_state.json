@@ -1,10 +1,10 @@
 {
   "asset": "SMAXOF1",
   "currency": "XAF",
-  "current_price_xaf": 1207.32,
-  "previous_price_xaf": 1197.92,
-  "change_pct": 0.7849,
-  "updated_at": "2026-09-24T08:30:25+00:00",
+  "current_price_xaf": 1207.99,
+  "previous_price_xaf": 1207.32,
+  "change_pct": 0.0556,
+  "updated_at": "2026-09-24T08:55:28+00:00",
   "history": [
     {
       "timestamp": "2026-09-11T12:14:56+00:00",
@@ -1585,6 +1585,11 @@
       "timestamp": "2026-09-24T08:30:25+00:00",
       "price_xaf": 1207.32,
       "change_pct": 0.7849
+    },
+    {
+      "timestamp": "2026-09-24T08:55:28+00:00",
+      "price_xaf": 1207.99,
+      "change_pct": 0.0556
     }
   ],
   "transparency": {
@@ -1604,5 +1609,14 @@
     "epos_revenue_xaf": 0,
     "epos_sales_count": 0
   },
-  "incident_active": false
+  "incident_active": false,
+  "mahrasoft": {
+    "company": "Mahrasoft Innovations",
+    "valuation_xaf": 327957000,
+    "tokenized_offering_xaf": 65591400,
+    "year_1_net_profit_xaf": 95822043.0,
+    "year_1_roi_pct": 58.4357,
+    "audit_pass": true,
+    "updated_at": "2026-09-24T08:55:28+00:00"
+  }
 }

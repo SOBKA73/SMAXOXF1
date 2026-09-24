@@ -244,3 +244,11 @@ Pour reproduire le calcul :
 ```bash
 python3 mahrasoft_token_model.py
 ```
+
+## 13. Intégration dynamique du frontend Mahrasoft
+
+Le dashboard GitHub Pages charge maintenant [`mahrasoft_model_summary.json`](mahrasoft_model_summary.json) avec un paramètre de cache-busting. Il affiche dynamiquement la valorisation de **327 957 000 XAF**, l’offre tokenisée de **65 591 400 XAF**, le bénéfice net de l’année 1, le ROI Smart-Ticket, les quatre business units et le calendrier de dividendes sur trois ans.
+
+À chaque cycle du workflow [`market-simulation.yml`](.github/workflows/market-simulation.yml), `market_cron.py` reconstruit le P&L Mahrasoft, le yield schedule et la synthèse d’audit. Le workflow commit les artefacts CSV/JSON puis les copie dans le paquet GitHub Pages. Le workflow [`deploy-pages.yml`](.github/workflows/deploy-pages.yml) effectue également cette copie lors de chaque publication déclenchée par un push.
+
+Le dashboard public est disponible ici : [https://sobka73.github.io/SMAXOXF1/](https://sobka73.github.io/SMAXOXF1/).
