@@ -1,8 +1,8 @@
-# SMAXOXF1 — SMAXO Starlink Tchad
+# SMAXOXF1 — Mahrasoft Innovations RWA
 
 ## Dossier de présentation du projet
 
-**SMAXOXF1** est un prototype de plateforme RWA (*Real-World Assets*) qui relie une activité de connectivité Wi-Fi à N’Djamena, un tableau de bord financier et un jeton ERC-20 déployé sur **Arbitrum Sepolia**, réseau de test.
+**SMAXOXF1** est un prototype de plateforme RWA (*Real-World Assets*) pour l’écosystème multi-segments **Mahrasoft Innovations** : GovTech, EdTech, marketplace et Pharma/Health Tech. Il relie un modèle financier consolidé, un tableau de bord et un jeton ERC-20 de test sur **Arbitrum Sepolia**.
 
 Ce dépôt est destiné à la revue technique, financière et opérationnelle du projet. Les chiffres financiers sont des hypothèses de scénario. Le contrat et les flux de paiement sont actuellement utilisés dans un environnement de test. Le dépôt ne constitue pas une offre au public, une garantie de rendement ou un avis juridique, fiscal et réglementaire.
 
@@ -104,9 +104,9 @@ Le contrat documenté est `StarlinkRwaToken` sur **Arbitrum Sepolia**.
 
 Le contrat utilise des contrôles de propriété, une whitelist et des fonctions de dividendes. Les fonctions d’administration doivent être testées uniquement sur le réseau de test et avec les autorisations appropriées.
 
-## 6. Simulation financière
+## 6. Ancienne simulation financière Starlink — archivée
 
-Le modèle financier est un scénario de présentation et non une comptabilité certifiée. Il suppose notamment 15 kits, cinq Hotspots actifs, une activité de vente de tickets et une fiscalité simulée.
+Cette section documente l’ancien scénario Starlink conservé pour traçabilité historique. Il n’est plus le modèle financier canonique du projet. Le modèle actif est désormais [`mahrasoft_token_model.py`](mahrasoft_token_model.py), décrit à la section 12.
 
 | Indicateur du scénario | Valeur modélisée |
 |---|---:|
@@ -190,3 +190,57 @@ Les clés Owner, les secrets GitHub et les accès aux routeurs MikroTik ne doive
 - [4] [Actions de déploiement GitHub Pages](https://github.com/SOBKA73/SMAXOXF1/actions/workflows/deploy-pages.yml)
 - [5] [Actions de simulation de marché](https://github.com/SOBKA73/SMAXOXF1/actions/workflows/market-simulation.yml)
 - [6] [Dépôt GitHub SMAXOXF1](https://github.com/SOBKA73/SMAXOXF1)
+
+## 12. Modèle financier canonique — Mahrasoft Innovations
+
+Le fichier [`mahrasoft_token_model.py`](mahrasoft_token_model.py) remplace le modèle matériel Starlink autonome par une simulation consolidée de trois exercices. Les hypothèses sont celles fournies pour le périmètre Mahrasoft et ne constituent pas des comptes audités.
+
+### Valorisation et offre RWA
+
+| Élément | Valeur |
+|---|---:|
+| Valorisation globale | **500 000 EUR / 327 957 000 XAF** |
+| Allocation tokenisée cible | **20 %** |
+| Offre RWA tokenisée | **65 591 400 XAF** |
+| Réserve non tokenisée implicite | **262 365 600 XAF** |
+| Buffer pipeline Web3 | **0,5 % de l’offre = 327 957 XAF en année 1** |
+| Convention de modélisation Smart-Ticket | **100 000 unités**, soit 655,914 XAF par unité de l’offre cible |
+
+Le nombre de Smart-Tickets et leur valeur unitaire sont une convention de modélisation ajoutée car aucun nombre d’unités ni nominal n’a été spécifié. Ils doivent être remplacés par les paramètres juridiques et commerciaux définitifs avant émission.
+
+### Hypothèses par business unit
+
+| Business unit | Driver annuel de base | Croissance modélisée | Traitement des coûts |
+|---|---:|---:|---|
+| GovTech & Infrastructure | 3 × 25 000 000 = **75 000 000 XAF** | **15 % par an** | Inclus dans l’OPEX corporate |
+| EdTech | 300 × 150 000 = **45 000 000 XAF** | **0 % par défaut** | COGS de 25 %, correspondant à 75 % de marge brute |
+| E-Commerce | 120 000 000 × 7 % = **8 400 000 XAF** | **0 % par défaut** | Commission nette, aucun COGS additionnel modélisé |
+| Pharma & Health Tech | 40 × 50 000 × 12 = **24 000 000 XAF** | **0 % par défaut** | Inclus dans l’OPEX corporate |
+| OPEX corporate | **45 000 000 XAF/an** | Fixe | Siège, équipe engineering et infrastructure |
+
+L’absence de croissance explicite pour EdTech, E-Commerce et Pharma/Health Tech est traitée comme une hypothèse silencieuse de maintien à la base. Elle est volontairement visible dans le tableau afin d’être facilement remplacée.
+
+### P&L consolidé et rendement Smart-Ticket
+
+| Exercice | Chiffre d’affaires | Résultat net modélisé | Dividendes à 40 % | ROI annuel de l’offre |
+|---:|---:|---:|---:|---:|
+| 1 | **152 400 000 XAF** | **95 822 043 XAF** | **38 328 817,20 XAF** | **58,4357 %** |
+| 2 | **163 650 000 XAF** | **107 400 000 XAF** | **42 960 000 XAF** | **65,4964 %** |
+| 3 | **176 587 500 XAF** | **120 337 500 XAF** | **48 135 000 XAF** | **73,3861 %** |
+
+Le ROI est calculé comme `dividendes distribuables / 65 591 400 XAF`. Le dividende par Smart-Ticket est respectivement de **383,288172 XAF**, **429,600000 XAF** et **481,350000 XAF** sur les trois exercices selon la convention de 100 000 unités.
+
+### Sorties et validation
+
+- [`mahrasoft_consolidated_pnl.csv`](mahrasoft_consolidated_pnl.csv) : P&L consolidé par segment sur trois ans ;
+- [`mahrasoft_token_yield.csv`](mahrasoft_token_yield.csv) : rendement de l’offre et dividende par Smart-Ticket ;
+- [`mahrasoft_model_summary.json`](mahrasoft_model_summary.json) : synthèse structurée et audit checks ;
+- [`entity_card.md`](entity_card.md) : fiche de périmètre de l’entité et des hypothèses.
+
+Le script vérifie automatiquement la parité EUR/XAF, l’allocation de 20 %, la cohérence de la structure de capital, la non-négativité du chiffre d’affaires, le plafonnement des dividendes au résultat positif et le buffer Web3 de 0,5 %. Tous les contrôles exécutés lors de cette refonte sont **PASS**.
+
+Pour reproduire le calcul :
+
+```bash
+python3 mahrasoft_token_model.py
+```

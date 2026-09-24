@@ -1,0 +1,99 @@
+{
+  "company": "Mahrasoft Innovations",
+  "valuation_xaf": 327957000,
+  "tokenized_offering_xaf": 65591400,
+  "pnl": [
+    {
+      "year": 1,
+      "GovTech & Infrastructure revenue XAF": 75000000.0,
+      "GovTech & Infrastructure COGS XAF": 0.0,
+      "EdTech revenue XAF": 45000000.0,
+      "EdTech COGS XAF": 11250000.0,
+      "E-Commerce revenue XAF": 8400000.0,
+      "E-Commerce COGS XAF": 0.0,
+      "Pharma & Health Tech revenue XAF": 24000000.0,
+      "Pharma & Health Tech COGS XAF": 0.0,
+      "total revenue XAF": 152400000.0,
+      "total COGS XAF": 11250000.0,
+      "gross profit XAF": 141150000.0,
+      "corporate OPEX XAF": 45000000.0,
+      "Web3 pipeline fee XAF": 327957.0,
+      "EBITDA / net operating profit XAF": 95822043.0,
+      "net profit XAF": 95822043.0
+    },
+    {
+      "year": 2,
+      "GovTech & Infrastructure revenue XAF": 86250000.0,
+      "GovTech & Infrastructure COGS XAF": 0.0,
+      "EdTech revenue XAF": 45000000.0,
+      "EdTech COGS XAF": 11250000.0,
+      "E-Commerce revenue XAF": 8400000.0,
+      "E-Commerce COGS XAF": 0.0,
+      "Pharma & Health Tech revenue XAF": 24000000.0,
+      "Pharma & Health Tech COGS XAF": 0.0,
+      "total revenue XAF": 163650000.0,
+      "total COGS XAF": 11250000.0,
+      "gross profit XAF": 152400000.0,
+      "corporate OPEX XAF": 45000000.0,
+      "Web3 pipeline fee XAF": 0.0,
+      "EBITDA / net operating profit XAF": 107400000.0,
+      "net profit XAF": 107400000.0
+    },
+    {
+      "year": 3,
+      "GovTech & Infrastructure revenue XAF": 99187500.0,
+      "GovTech & Infrastructure COGS XAF": 0.0,
+      "EdTech revenue XAF": 45000000.0,
+      "EdTech COGS XAF": 11250000.0,
+      "E-Commerce revenue XAF": 8400000.0,
+      "E-Commerce COGS XAF": 0.0,
+      "Pharma & Health Tech revenue XAF": 24000000.0,
+      "Pharma & Health Tech COGS XAF": 0.0,
+      "total revenue XAF": 176587500.0,
+      "total COGS XAF": 11250000.0,
+      "gross profit XAF": 165337500.0,
+      "corporate OPEX XAF": 45000000.0,
+      "Web3 pipeline fee XAF": 0.0,
+      "EBITDA / net operating profit XAF": 120337500.0,
+      "net profit XAF": 120337500.0
+    }
+  ],
+  "token_yield": [
+    {
+      "year": 1,
+      "tokenized offering XAF": 65591400,
+      "net profit XAF": 95822043.0,
+      "dividend payout ratio": 0.4,
+      "dividends allocated to token holders XAF": 38328817.2,
+      "annualized ROI %": 58.4357,
+      "dividend per Smart-Ticket XAF": 383.288172
+    },
+    {
+      "year": 2,
+      "tokenized offering XAF": 65591400,
+      "net profit XAF": 107400000.0,
+      "dividend payout ratio": 0.4,
+      "dividends allocated to token holders XAF": 42960000.0,
+      "annualized ROI %": 65.4964,
+      "dividend per Smart-Ticket XAF": 429.6
+    },
+    {
+      "year": 3,
+      "tokenized offering XAF": 65591400,
+      "net profit XAF": 120337500.0,
+      "dividend payout ratio": 0.4,
+      "dividends allocated to token holders XAF": 48135000.0,
+      "annualized ROI %": 73.3861,
+      "dividend per Smart-Ticket XAF": 481.35
+    }
+  ],
+  "audit_checks": {
+    "valuation_parity_check": true,
+    "tokenization_allocation_check": true,
+    "capital_structure_check": true,
+    "non_negative_revenue_check": true,
+    "dividend_not_above_net_profit_check": true,
+    "web3_fee_buffer_check": true,
+    "all_checks_pass": true
+  }
+}
