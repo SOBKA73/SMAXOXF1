@@ -1,16 +1,11 @@
 {
   "asset": "SMAXOF1",
   "currency": "XAF",
-  "current_price_xaf": 5666.13,
-  "previous_price_xaf": 5694.36,
-  "change_pct": -0.4958,
-  "updated_at": "2026-11-13T00:28:04+00:00",
+  "current_price_xaf": 5684.08,
+  "previous_price_xaf": 5666.13,
+  "change_pct": 0.3168,
+  "updated_at": "2026-11-13T08:01:21+00:00",
   "history": [
-    {
-      "timestamp": "2026-09-15T15:27:48+00:00",
-      "price_xaf": 600.73,
-      "change_pct": 0.1446
-    },
     {
       "timestamp": "2026-09-15T16:28:59+00:00",
       "price_xaf": 602.79,
@@ -3605,6 +3600,11 @@
       "timestamp": "2026-11-13T00:28:04+00:00",
       "price_xaf": 5666.13,
       "change_pct": -0.4958
+    },
+    {
+      "timestamp": "2026-11-13T08:01:21+00:00",
+      "price_xaf": 5684.08,
+      "change_pct": 0.3168
     }
   ],
   "transparency": {
@@ -3632,6 +3632,6 @@
     "year_1_net_profit_xaf": 95822043.0,
     "year_1_roi_pct": 58.4357,
     "audit_pass": true,
-    "updated_at": "2026-11-13T00:28:04+00:00"
+    "updated_at": "2026-11-13T08:01:21+00:00"
   }
 }
